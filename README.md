@@ -55,6 +55,8 @@ flowchart LR
 작성된 프롬프트 파일을 기반으로 GitHub Issue를 생성합니다.  
 이슈 하나가 하나의 평가 단위이며, 아래 내용이 자동으로 포함됩니다.
 
+→ [이슈 생성 템플릿 보기](.claude/skills/vibe-eval/templates/issue-body.md)
+
 | 포함 항목 | 설명 |
 |-----------|------|
 | 공통 프롬프트 | 모든 모델이 수행할 작업 |
