@@ -9,26 +9,7 @@
 
 ## 흐름도
 
-```mermaid
-flowchart LR
-    subgraph admin["👤 관리자"]
-        A["① 프롬프트 작성\n모든 AI가 진행할 공통 프롬프트"]
-        B["② 이슈 생성\n공용 프롬프트와\n바이브코딩 참고 설명서"]
-        G["⑥ 리포트 생성\nIssue의 PR들을\n분석하여 리포트 생성"]
-    end
-
-    subgraph user["🙋 사용자"]
-        C["③ 바이브코딩 요청\n이슈 링크 + 진행해줘\n추가 프롬프트 X / 지침서 가능"]
-        E["⑤ 리뷰 요청\n[PR링크] 리뷰 진행해줘\n다른 모델이 작업한 PR"]
-    end
-
-    subgraph vibe["🤖 바이브코딩 영역 (AI 모델)"]
-        D["④ 바이브코딩 진행\n이슈의 공용 프롬프트로 진행\nPR 생성"]
-        F["⑤ 리뷰 진행\n평가지표 기준 평가서 작성\nPR 댓글 등록"]
-    end
-
-    A --> B --> C --> D --> E --> F --> G
-```
+![vibe-eval 워크플로우](vibe_eval_workflow.svg)
 
 ---
 
