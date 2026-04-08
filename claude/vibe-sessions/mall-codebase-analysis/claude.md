@@ -14,7 +14,7 @@
 - **총 아웃풋 토큰:** N/A
 
 ### 공통 프롬프트 (마일스톤 기준)
-feature-definitions/mall-codebase-analysis.md 참고
+claude/feature-definitions/mall-codebase-analysis.md 참고
 
 ### 추가 프롬프트 (세션 중 발생)
 없음

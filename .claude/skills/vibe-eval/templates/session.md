@@ -23,7 +23,7 @@
 - **총 아웃풋 토큰:** {OUTPUT_TOKENS}
 
 ### 공통 프롬프트 (이슈 기준)
-feature-definitions/{SLUG}.md 참고
+claude/feature-definitions/{SLUG}.md 참고
 
 ### 추가 프롬프트 (세션 중 발생)
 없음

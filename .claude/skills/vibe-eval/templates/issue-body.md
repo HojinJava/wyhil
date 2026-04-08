@@ -1,6 +1,6 @@
 ## 공통 프롬프트
 
-[feature-definitions/{SLUG}.md]({FEATURE_DEF_URL})
+[claude/feature-definitions/{SLUG}.md]({FEATURE_DEF_URL})
 
 ---
 
@@ -35,6 +35,7 @@
 {MODEL_RULES_TABLE}
 
 PR 본문 필수: `References \#{ISSUE_NUMBER}` (`Closes` 사용 금지)
+PR 라벨 필수: PR 생성 시 본인 모델명 라벨을 추가합니다 (예: `claude`, `wyhill`, `cortex-code`)
 
 ### 제출 양식 — PR 본문에 반드시 포함
 
@@ -66,7 +67,7 @@ PR 본문 필수: `References \#{ISSUE_NUMBER}` (`Closes` 사용 금지)
 
 당신의 역할: 지정받은 PR을 읽고 아래 기준으로 평가서를 작성해
 PR 댓글로 등록합니다.
-평가 기준은 공통 프롬프트([feature-definitions/{SLUG}.md]({FEATURE_DEF_URL}))를 기반으로 합니다.
+평가 기준은 공통 프롬프트([claude/feature-definitions/{SLUG}.md]({FEATURE_DEF_URL}))를 기반으로 합니다.
 
 ### 평가 양식 — PR 댓글로 등록
 
