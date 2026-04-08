@@ -12,7 +12,7 @@
 
 ## 기본 정보
 - **태스크:** mall/product-new-function [L1]
-- **모델:** Claude
+- **모델:** Wyhill
 - **날짜:** {DATE}
 - **소요 시간:** {DURATION}분
 - **지침서:** {GUIDELINES}
@@ -23,7 +23,7 @@
 - **총 아웃풋 토큰:** {OUTPUT_TOKENS}
 
 ### 공통 프롬프트 (이슈 기준)
-claude/feature-definitions/mall-product-new-function.md 참고
+.claude/feature-definitions/mall-product-new-function.md 참고
 
 ### 추가 프롬프트 (세션 중 발생)
 없음
@@ -39,4 +39,4 @@ claude/feature-definitions/mall-product-new-function.md 참고
 ## GitHub
 - **Issue:** \#10
 - **PR:** 미연결
-- **브랜치:** vibe/claude/mall-product-new-function-10
+- **브랜치:** vibe/wyhill/mall-product-new-function-10

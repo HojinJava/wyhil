@@ -113,7 +113,7 @@ REPO = gh repo view --json nameWithOwner -q .nameWithOwner
 
 ### 2단계: feature.md 작성
 
-`claude/feature-definitions/{SLUG}.md` 파일 생성:
+`.claude/feature-definitions/{SLUG}.md` 파일 생성:
 
 ```markdown
 # {TITLE}
@@ -139,7 +139,7 @@ gh label create "project:{PROJECT}" --color "e4e669" --description "{PROJECT} �
 
 ### 4단계: 이슈 본문 구성
 
-`FEATURE_DEF_URL = https://github.com/{REPO}/blob/main/claude/feature-definitions/{SLUG}.md`
+`FEATURE_DEF_URL = https://github.com/{REPO}/blob/main/.claude/feature-definitions/{SLUG}.md`
 
 MODEL_RULES_TABLE (ISSUE_NUMBER는 플레이스홀더로 먼저 `{ISSUE_NUMBER}` 사용):
 ```
@@ -172,13 +172,13 @@ gh issue edit {ISSUE_NUMBER} --body "{ISSUE_BODY_FINAL}"
 
 `COMBINED_SLUG = {SLUG}-{ISSUE_NUMBER}`
 
-각 모델에 대해 `claude/vibe-sessions/{COMBINED_SLUG}/{MODEL_FILENAME}.md` 생성.
+각 모델에 대해 `.claude/vibe-sessions/{COMBINED_SLUG}/{MODEL_FILENAME}.md` 생성.
 `.claude/skills/vibe-eval/templates/session.md` 플레이스홀더 치환.
 
 ### 7단계: 커밋 및 결과 출력
 
 ```bash
-git add claude/feature-definitions/{SLUG}.md claude/vibe-sessions/{COMBINED_SLUG}/
+git add .claude/feature-definitions/{SLUG}.md .claude/vibe-sessions/{COMBINED_SLUG}/
 git commit -m "chore: init vibe-eval session for {TITLE} [L{LEVEL}] #{ISSUE_NUMBER}"
 ```
 

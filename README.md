@@ -9,7 +9,7 @@
 
 ## 흐름도
 
-![vibe-eval 워크플로우](claude/vibe_eval_workflow.svg)
+![vibe-eval 워크플로우](.claude/vibe_eval_workflow.svg)
 
 ---
 
@@ -18,7 +18,7 @@
 **담당:** 👤 관리자
 
 모든 참여 AI 모델이 동일하게 수행할 공통 프롬프트를 작성합니다.  
-`claude/feature-definitions/{slug}.md` 파일에 저장하며, 이후 이슈 생성 시 자동으로 포함됩니다.
+`.claude/feature-definitions/{slug}.md` 파일에 저장하며, 이후 이슈 생성 시 자동으로 포함됩니다.
 
 | 작성 항목 | 설명 |
 |-----------|------|
@@ -168,7 +168,7 @@ combined:   mall-codebase-analysis-1
 
 브랜치:  vibe/claude/mall-codebase-analysis-1
 PR 제목: [Claude] mall/codebase-analysis #1
-세션:    claude/vibe-sessions/mall-codebase-analysis-1/claude.md
+세션:    .claude/vibe-sessions/mall-codebase-analysis-1/claude.md
 ```
 
 ---
