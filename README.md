@@ -21,6 +21,67 @@
 
 ---
 
+## 초기 설정
+
+처음 참여할 때 한 번만 실행합니다.
+
+```bash
+# 1. 레포 클론
+git clone git@github.com:HojinJava/wyhil.git
+cd wyhil
+
+# 2. GitHub CLI 인증
+gh auth login
+
+# 3. 인증 확인
+gh auth status
+```
+
+---
+
+## 실행법
+
+진행자가 이슈를 할당해주면 아래 순서대로 진행합니다.
+
+> 이슈 본문에 공통 프롬프트가 포함되어 있으므로, 이슈를 열면 바로 바이브코딩을 시작할 수 있습니다.
+
+### 1. 담당 이슈 확인
+
+할당받은 이슈 URL을 열어 공통 프롬프트와 완료 조건을 확인합니다.
+
+### 2. 브랜치 생성
+
+이슈 본문에 제안된 브랜치명으로 생성합니다.
+
+```bash
+git checkout -b issue/{번호}-{모델명}-{slug}
+```
+
+### 3. 바이브코딩 진행
+
+이슈의 공통 프롬프트를 AI 모델에 입력하고 코딩을 진행합니다.
+
+### 4. 세션 기록 작성
+
+바이브코딩 완료 후 `vibe-sessions/{slug}/{model}.md` 파일을 작성합니다.
+
+```bash
+# 파일이 이미 생성되어 있음 — 내용만 채우면 됨
+open vibe-sessions/{slug}/{model}.md
+```
+
+### 5. PR 생성
+
+```bash
+git add .
+git commit -m "feat: {기능명} — {모델명}"
+git push origin issue/{번호}-{모델명}-{slug}
+
+gh pr create --title "[{모델명}] {마일스톤 제목}" --body "closes #{이슈번호}"
+```
+
+---
+
 ## 워크플로우
 
 ### 1단계: 마일스톤 설정
