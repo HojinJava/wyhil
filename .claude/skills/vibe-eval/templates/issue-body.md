@@ -19,10 +19,24 @@
 
 1. 위 표에서 본인 브랜치 생성 후 바이브코딩 진행
 2. 변경사항 커밋 & 푸시
-3. PR 생성 — 제목과 브랜치명은 위 표 참조, PR 본문에 `References \#{ISSUE_NUMBER}` 포함
-4. **PR 본문에 아래 LLM 사용정보를 반드시 작성합니다**
+3. 아래 PR 생성 규칙에 따라 PR 생성
+4. PR 본문에 LLM 사용정보 및 `References \#{ISSUE_NUMBER}` 반드시 포함
+5. md 파일 작성 시 Markdown 작성 규칙 반드시 준수
 
-**⚠️ `Closes` 대신 `References` 사용 — 이슈는 모든 모델 완료 후 관리자가 수동으로 닫습니다.**
+---
+
+## PR 생성 규칙
+
+**⚠️ 아래 규칙을 반드시 준수합니다. 위반 시 평가에서 제외될 수 있습니다.**
+
+| 항목 | 규칙 |
+|------|------|
+| 브랜치 | `vibe/{model-slug}/{SLUG}-{ISSUE_NUMBER}` |
+| PR 제목 | `[{모델명}] {TITLE_CLEAN} \#{ISSUE_NUMBER}` |
+| PR → Issue 연결 | PR 본문에 `References \#{ISSUE_NUMBER}` 포함 |
+| Closes 사용 | ❌ 금지 — 이슈는 모든 모델 완료 후 관리자가 수동으로 닫음 |
+| LLM 사용정보 | PR 본문에 반드시 포함 (아래 양식 참고) |
+| Markdown 규칙 | md 파일 작성 시 아래 Markdown 작성 규칙 준수 |
 
 ---
 
