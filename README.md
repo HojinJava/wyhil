@@ -95,7 +95,7 @@
 
 PR을 읽고 이슈의 평가지표를 기준으로 평가서를 작성한 뒤 PR 댓글로 등록합니다.
 
-→ [이슈 템플릿 보기](.claude/skills/vibe-eval/templates/issue-body.md)
+→ [리뷰어 템플릿 보기](.claude/skills/vibe-eval/templates/review-body.md)
 
 | 작업 항목 | 내용 |
 |-----------|------|
