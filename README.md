@@ -89,6 +89,8 @@ flowchart LR
 
 이슈를 읽고 공통 프롬프트에 따라 개발을 진행한 후 PR을 생성합니다.
 
+→ [작업 프로세스 보기](.claude/skills/vibe-eval/templates/issue-body.md#작업-프로세스-모델-공통)
+
 | 작업 항목 | 내용 |
 |-----------|------|
 | 브랜치 | `vibe/{model-slug}/{slug}-{issue-number}` |
@@ -98,7 +100,7 @@ flowchart LR
 
 ---
 
-## 5. 리뷰 요청 / 리뷰 진행
+## 5. 리뷰 진행
 
 ### 리뷰 요청 — 🙋 사용자
 
@@ -111,6 +113,8 @@ flowchart LR
 ### 리뷰 진행 — 🤖 바이브코딩 영역 (AI 모델)
 
 PR을 읽고 이슈의 평가지표를 기준으로 평가서를 작성한 뒤 PR 댓글로 등록합니다.
+
+→ [이슈 템플릿 보기](.claude/skills/vibe-eval/templates/issue-body.md)
 
 | 작업 항목 | 내용 |
 |-----------|------|
@@ -126,6 +130,8 @@ PR을 읽고 이슈의 평가지표를 기준으로 평가서를 작성한 뒤 P
 
 모든 모델의 PR 및 리뷰가 완료되면 Issue를 수동으로 종료하고 리포트를 생성합니다.  
 Issue에 연결된 PR과 세션 기록을 분석하여 모델별 비교 리포트를 작성합니다.
+
+→ [리포트 생성 가이드](.claude/skills/vibe-eval/report.md)
 
 결과물: `reports/{slug}-{issue-number}/comparison.md`
 
