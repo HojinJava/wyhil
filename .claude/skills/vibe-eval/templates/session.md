@@ -5,30 +5,28 @@
 - **모델:** {MODEL}
 - **날짜:** {DATE}
 - **소요 시간:** {DURATION}분
-- **지침서:** {GUIDELINES} <!-- 로컬 지침서 파일명. 없으면 "없음" -->
+- **지침서:** {GUIDELINES}
 
 ## 프롬프트
 - **총 프롬프트 횟수:** {PROMPT_COUNT}회
-- **총 인풋 토큰:** {INPUT_TOKENS} <!-- 확인 불가 시 N/A -->
-- **총 아웃풋 토큰:** {OUTPUT_TOKENS} <!-- 확인 불가 시 N/A -->
+- **총 인풋 토큰:** {INPUT_TOKENS}
+- **총 아웃풋 토큰:** {OUTPUT_TOKENS}
 
 ### 공통 프롬프트 (이슈 기준)
-> [feature-definitions/{SLUG}.md](https://github.com/{REPO}/blob/main/feature-definitions/{SLUG}.md) 참고
+feature-definitions/{SLUG}.md 참고
 
 ### 추가 프롬프트 (세션 중 발생)
-<!-- 없으면 "없음" -->
-1. 
+없음
 
 ## 수동 수정
-- **수동 수정 여부:** {MANUAL_FIX} <!-- 있음 / 없음 -->
+- **수동 수정 여부:** {MANUAL_FIX}
 - **수정 내용:** {MANUAL_FIX_DESC}
 
 ## 자체 평가
 - **완성도:** {SCORE}/5
-  <!-- 5=모든 요구사항 충족, 4=핵심 기능 완료+미세 결함, 3=주요 기능 완료+일부 미구현, 2=부분 구현, 1=거의 미구현 -->
 - **메모:** {NOTES}
 
 ## GitHub
-- **Issue:** #{ISSUE_NUMBER}
-- **PR:** <!-- PR 번호 또는 "미연결" -->
+- **Issue:** \#{ISSUE_NUMBER}
+- **PR:** 미연결
 - **브랜치:** {BRANCH_NAME}
