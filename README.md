@@ -170,9 +170,3 @@ combined:   mall-codebase-analysis-1
 PR 제목: [Claude] mall/codebase-analysis #1
 세션:    .claude/vibe-sessions/mall-codebase-analysis-1/claude.md
 ```
-
----
-
-## 설계 문서
-
-- [Vibe Eval 설계 문서](docs/superpowers/specs/2026-04-08-vibe-eval-design.md)
