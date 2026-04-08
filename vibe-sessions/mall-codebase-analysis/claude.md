@@ -14,7 +14,7 @@
 - **총 아웃풋 토큰:** N/A
 
 ### 공통 프롬프트 (마일스톤 기준)
-> [feature-definitions/mall-codebase-analysis.md](https://github.com/HojinJava/wyhil/blob/main/feature-definitions/mall-codebase-analysis.md) 참고
+feature-definitions/mall-codebase-analysis.md 참고
 
 ### 추가 프롬프트 (세션 중 발생)
 없음
@@ -49,6 +49,6 @@
   - 실제 서비스 메서드 전수 조사 미수행 — 핵심 서비스 중심으로 분석
 
 ## GitHub
-- **Issue:** #1
+- **Issue:** \#1
 - **PR:** 미연결
 - **브랜치:** issue/1-claude-mall-codebase-analysis
