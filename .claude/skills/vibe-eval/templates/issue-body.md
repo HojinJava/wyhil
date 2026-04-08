@@ -8,9 +8,7 @@
 
 ## 공통 프롬프트
 
-> 아래 내용이 이번 바이브코딩의 작업 지시입니다. 추가 맥락은 [기능 정의서]({FEATURE_DEF_URL})를 참고하세요.
-
-{COMMON_PROMPT}
+[feature-definitions/{SLUG}.md]({FEATURE_DEF_URL})
 
 ---
 

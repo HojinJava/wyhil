@@ -88,8 +88,8 @@ Issue 본문은 `skills/vibe-eval/templates/issue-body.md`의 플레이스홀더
 - `{MILESTONE_URL}` → 마일스톤 URL
 - `{MODEL}` → 모델명
 - `{SLUG}` → 슬러그
-- `{FEATURE_DEF_URL}` → 기능 정의서 URL
-- `{COMMON_PROMPT}` → 공통 프롬프트
+- `{FEATURE_DEF_URL}` → 기능 정의서 GitHub blob URL
+- `{ISSUE_NUMBER}` → 생성된 Issue 번호
 - `{MODEL_FILENAME}` → 모델 파일명
 
 ```bash
