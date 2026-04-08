@@ -1,20 +1,19 @@
 # 바이브코딩 세션 리포트
 
 ## 기본 정보
-- **마일스톤:** {MILESTONE_TITLE}
+- **태스크:** {TITLE}
 - **모델:** {MODEL}
-- **작업자:** {OPERATOR}
 - **날짜:** {DATE}
 - **소요 시간:** {DURATION}분
 - **지침서:** {GUIDELINES} <!-- 로컬 지침서 파일명. 없으면 "없음" -->
 
 ## 프롬프트
 - **총 프롬프트 횟수:** {PROMPT_COUNT}회
-- **총 인풋 토큰:** {INPUT_TOKENS} <!-- 확인 불가 시 N/A, 컨텍스트 누적 합산 기준 -->
+- **총 인풋 토큰:** {INPUT_TOKENS} <!-- 확인 불가 시 N/A -->
 - **총 아웃풋 토큰:** {OUTPUT_TOKENS} <!-- 확인 불가 시 N/A -->
 
-### 공통 프롬프트 (마일스톤 기준)
-{COMMON_PROMPT}
+### 공통 프롬프트 (이슈 기준)
+> [feature-definitions/{SLUG}.md](https://github.com/{REPO}/blob/main/feature-definitions/{SLUG}.md) 참고
 
 ### 추가 프롬프트 (세션 중 발생)
 <!-- 없으면 "없음" -->
@@ -31,5 +30,5 @@
 
 ## GitHub
 - **Issue:** #{ISSUE_NUMBER}
-- **PR:** #{PR_NUMBER} <!-- PR 생성 전이면 "미연결" -->
+- **PR:** <!-- PR 번호 또는 "미연결" -->
 - **브랜치:** {BRANCH_NAME}
