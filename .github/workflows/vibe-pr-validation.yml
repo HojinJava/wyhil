@@ -1,0 +1,93 @@
+name: Vibe PR Validation
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Vibe PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const headBranch = context.payload.pull_request.head.ref;
+            const baseBranch = context.payload.pull_request.base.ref;
+            const author = context.payload.pull_request.user.login;
+            const prNumber = context.payload.pull_request.number;
+
+            // vibe/* 브랜치만 검증
+            const match = headBranch.match(/^vibe\/([^\/]+)\/.+/);
+            if (!match) {
+              console.log(`ℹ️ vibe 브랜치 아님 (${headBranch}), 검증 건너뜀`);
+              return;
+            }
+
+            const modelKey = match[1];
+
+            // 모델 설정 읽기
+            const config = JSON.parse(fs.readFileSync('.github/vibe-models.json', 'utf8'));
+            const model = config.models[modelKey];
+
+            async function rejectPR(reason) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `❌ **Vibe PR 검증 실패**\n\n${reason}`
+              });
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                state: 'closed'
+              });
+            }
+
+            // 검사 1: 등록된 모델인지 확인
+            if (!model) {
+              await rejectPR(
+                `등록되지 않은 모델입니다: \`${modelKey}\`\n\n` +
+                `\`.github/vibe-models.json\`에 해당 모델이 없습니다.\n` +
+                `\`/model add ${modelKey}\` 명령어로 먼저 모델을 등록하세요.`
+              );
+              return;
+            }
+
+            // 검사 2: PR 대상 브랜치가 모델 브랜치인지 확인
+            if (baseBranch !== modelKey) {
+              await rejectPR(
+                `PR 대상 브랜치가 올바르지 않습니다.\n\n` +
+                `| 항목 | 값 |\n|------|----|\n` +
+                `| 작업 브랜치 | \`${headBranch}\` |\n` +
+                `| 예상 대상 | \`${modelKey}\` |\n` +
+                `| 실제 대상 | \`${baseBranch}\` |\n\n` +
+                `\`${modelKey}\` 브랜치를 대상으로 PR을 다시 생성해주세요.`
+              );
+              return;
+            }
+
+            // 검사 3: PR 작성자가 등록된 계정인지 확인 (계정이 설정된 경우만)
+            if (model.github_account && author !== model.github_account) {
+              await rejectPR(
+                `PR 작성자가 올바르지 않습니다.\n\n` +
+                `| 항목 | 값 |\n|------|----|\n` +
+                `| 브랜치 | \`${headBranch}\` (${model.display_name} 모델) |\n` +
+                `| 예상 작성자 | \`@${model.github_account}\` |\n` +
+                `| 실제 작성자 | \`@${author}\` |\n\n` +
+                `해당 모델의 계정으로 PR을 생성해주세요.`
+              );
+              return;
+            }
+
+            console.log(`✅ PR 검증 통과: @${author} → ${model.display_name} (${modelKey})`);
