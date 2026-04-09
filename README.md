@@ -158,6 +158,25 @@ repo/
             └── comparison.md
 ```
 
+---
+
+## 관리자 기능
+
+Claude Code에서 `/명령어`로 실행하는 프로젝트 전용 관리 커맨드입니다.
+
+| 커맨드 | 사용법 | 설명 |
+|--------|--------|------|
+| `/model` | `/model` | 등록된 모델 목록 및 브랜치 확인 |
+| `/model add` | `/model add <key>` | 새 모델 등록 + 브랜치 자동 생성 + GitHub 라벨 생성 |
+| `/model del` | `/model del <key>` | 모델 삭제 (브랜치 삭제 여부 선택 가능) |
+| `/user-mapping` | `/user-mapping` | 미매핑 협업자를 모델에 연결 |
+| `/user-mapping del` | `/user-mapping del <github-user>` | 계정 매핑 해제 |
+| `/w-create-issue` | `/w-create-issue` | 이슈 생성 마법사 (프로젝트·레벨·프롬프트·모델 선택) |
+
+모델 정보는 `.github/vibe-models.json`에서 관리되며, PR 유효성 검사는 `.github/workflows/vibe-pr-validation.yml`에서 자동 실행됩니다.
+
+---
+
 ### 슬러그 & 네이밍 규칙
 
 ```
