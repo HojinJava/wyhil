@@ -167,7 +167,7 @@ git push origin main
 
 ## README 싱크 규칙
 
-`/model add`, `/model del`, `/user-mapping`, `/user-mapping del` 실행 후 커밋 전에 반드시 수행한다.
+`/wyh:model add`, `/wyh:model del`, `/wyh:user-mapping`, `/wyh:user-mapping del` 실행 후 커밋 전에 반드시 수행한다.
 
 `.github/vibe-models.json`을 읽어 아래 형식으로 표를 생성하고,
 `README.md`의 `<!-- VIBE-MODELS-START -->` ~ `<!-- VIBE-MODELS-END -->` 사이를 교체한다.
