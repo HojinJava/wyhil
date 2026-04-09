@@ -14,7 +14,7 @@
     },
     "wyhill-guide": {
       "display_name": "Wyhill+지침서",
-      "github_accounts": [],
+      "github_accounts": ["HojinJava"],
       "label": "model:Wyhill+지침서",
       "base_branch": "wyhill-guide"
     },
