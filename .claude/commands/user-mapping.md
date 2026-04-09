@@ -22,42 +22,45 @@ description: Vibe Eval GitHub 협업자↔모델 매핑/해제. 이 프로젝트
 ### 실행 순서
 
 **1. 협업자 목록 조회**
+
+Windows Git bash에서 `/repos/...` 형태로 호출하면 경로가 파일시스템 경로로 재작성되므로
+반드시 앞의 슬래시를 생략하고 호출한다.
+
 ```bash
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-gh api /repos/$REPO/collaborators --jq '.[].login'
+gh api "repos/$REPO/collaborators" --jq '.[].login'
 ```
 
-**2. 미매핑 협업자 필터링**
-`.github/vibe-models.json`을 읽어 모든 모델의 `github_accounts` 배열에 포함된 계정을 제외한 목록을 만든다.
+**2. 협업자 목록 표시**
 
-**3. 미매핑 협업자 표시 및 선택**
+한 사용자가 여러 모델에 동시에 매핑될 수 있으므로 이미 매핑된 계정도 포함해 전체 협업자를 표시한다.
+각 계정 옆에 현재 연결된 모델 목록을 괄호로 보여준다.
+
 ```
-매핑되지 않은 협업자:
-1. @username-a
-2. @username-b
+협업자 목록:
+1. @HojinJava  (현재: claude)
+2. @username-b (현재: 없음)
 ```
-없으면 "매핑되지 않은 협업자가 없습니다." 출력 후 종료.
+
+협업자가 없으면 "등록된 협업자가 없습니다." 출력 후 종료.
 
 "매핑할 사용자 번호를 선택하세요:"
 
-**4. 전체 모델 목록 표시 및 선택**
+**3. 전체 모델 목록 표시 및 선택**
 ```
 등록된 모델:
-1. Claude (claude) — 계정: 없음
-2. Wyhill (wyhill) — 계정: @wyhill-a, @wyhill-b
+1. Claude (claude) — 계정: @HojinJava
+2. Wyhill (wyhill) — 계정: 없음
 3. Wyhill+지침서 (wyhill-guide) — 계정: 없음
 ```
 
+이미 해당 사용자가 연결된 모델에는 `(이미 연결됨)` 표시.
+
 "연결할 모델 번호를 선택하세요:"
 
-이미 계정이 있는 모델 선택 시:
-```
-현재 @{account1}, @{account2}가 연결되어 있습니다. 추가로 등록할까요?
-1. 예, 추가합니다
-2. 아니오, 취소합니다
-```
+이미 연결된 모델 선택 시 "이미 해당 모델에 연결되어 있습니다." 출력 후 다시 선택 요청.
 
-**5. 최종 확인**
+**4. 최종 확인**
 ```
 @<github-user> → <key> (<display_name>) 에 추가
 
@@ -65,12 +68,12 @@ gh api /repos/$REPO/collaborators --jq '.[].login'
 2. 취소
 ```
 
-**6. `.github/vibe-models.json` 업데이트**
+**5. `.github/vibe-models.json` 업데이트**
 해당 모델의 `github_accounts` 배열에 `<github-user>`를 추가한다 (중복 추가 방지).
 
-**7. README.md 참여 모델 표 갱신** (→ model.md의 README 싱크 규칙 참고)
+**6. README.md 참여 모델 표 갱신** (→ model.md의 README 싱크 규칙 참고)
 
-**8. 커밋 및 push**
+**7. 커밋 및 push**
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "chore: map @<github-user> to model <key>"
