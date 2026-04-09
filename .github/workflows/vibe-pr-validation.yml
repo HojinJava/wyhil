@@ -78,12 +78,13 @@ jobs:
             }
 
             // 검사 3: PR 작성자가 등록된 계정인지 확인 (계정이 설정된 경우만)
-            if (model.github_account && author !== model.github_account) {
+            const accounts = model.github_accounts || [];
+            if (accounts.length > 0 && !accounts.includes(author)) {
               await rejectPR(
                 `PR 작성자가 올바르지 않습니다.\n\n` +
                 `| 항목 | 값 |\n|------|----|\n` +
                 `| 브랜치 | \`${headBranch}\` (${model.display_name} 모델) |\n` +
-                `| 예상 작성자 | \`@${model.github_account}\` |\n` +
+                `| 허용 계정 | ${accounts.map(a => `\`@${a}\``).join(', ')} |\n` +
                 `| 실제 작성자 | \`@${author}\` |\n\n` +
                 `해당 모델의 계정으로 PR을 생성해주세요.`
               );

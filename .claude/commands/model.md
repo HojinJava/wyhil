@@ -14,7 +14,14 @@ description: Vibe Eval 모델 추가/삭제. 이 프로젝트 전용. 사용법:
 /model del <key>   — 기존 모델 삭제
 ```
 
-인수 없이 실행하면 위 사용법을 출력한다.
+인수 없이 실행하면 현재 등록된 모델 목록을 출력한다:
+
+```
+등록된 모델:
+1. Claude (claude) — 브랜치: claude — 계정: 없음
+2. Wyhill (wyhill) — 브랜치: wyhill — 계정: @wyhill-a, @wyhill-b
+3. Wyhill+지침서 (wyhill-guide) — 브랜치: wyhill-guide — 계정: 없음
+```
 
 ---
 
@@ -35,29 +42,28 @@ description: Vibe Eval 모델 추가/삭제. 이 프로젝트 전용. 사용법:
 - key: <key>
 - display_name: <display_name>
 - label: <label>
-- base_branch: <key>
-- github_account: (미설정)
+- base_branch: <key>  ← 브랜치도 즉시 생성됩니다
+- github_accounts: (미설정)
 
 이대로 진행할까요?
 ```
 
 **4. 확인 후 실행**
 
-a. `.github/vibe-models.json`에 항목 추가:
+a. 베이스 브랜치 즉시 생성 및 push:
+```bash
+git push origin main:<key>
+```
+로컬 브랜치 없이 remote에 바로 생성한다. 이미 존재하면 건너뜀.
+
+b. `.github/vibe-models.json`에 항목 추가:
 ```json
 "<key>": {
   "display_name": "<display_name>",
-  "github_account": "",
+  "github_accounts": [],
   "label": "<label>",
   "base_branch": "<key>"
 }
-```
-
-b. 베이스 브랜치 생성 및 push (현재 브랜치가 main인지 확인 후 진행):
-```bash
-git checkout main
-git push origin main:<key>
-git checkout main
 ```
 
 c. GitHub 라벨 생성 (이미 존재하면 건너뜀):
@@ -82,7 +88,7 @@ git push origin main
 ✅ 모델 등록 완료: <display_name> (<key>)
 - 베이스 브랜치: <key> (생성됨)
 - GitHub 라벨: <label> (생성됨)
-- github_account: 미설정 → /user-mapping 으로 계정 연결 가능
+- github_accounts: 미설정 → /user-mapping 으로 계정 연결 가능
 ```
 
 ---
@@ -99,7 +105,8 @@ git push origin main
 삭제 예정 모델:
 - key: <key>
 - display_name: <display_name>
-- github_account: <github_account 또는 "미설정">
+- base_branch: <key>
+- github_accounts: <계정 목록 또는 "미설정">
 
 베이스 브랜치(<key>)도 삭제할까요? (yes/no)
 정말 삭제하시겠습니까? (yes/no)

@@ -2,31 +2,31 @@
   "models": {
     "claude": {
       "display_name": "Claude",
-      "github_account": "",
+      "github_accounts": [],
       "label": "model:Claude",
       "base_branch": "claude"
     },
     "wyhill": {
       "display_name": "Wyhill",
-      "github_account": "",
+      "github_accounts": [],
       "label": "model:Wyhill",
       "base_branch": "wyhill"
     },
     "wyhill-guide": {
       "display_name": "Wyhill+지침서",
-      "github_account": "",
+      "github_accounts": [],
       "label": "model:Wyhill+지침서",
       "base_branch": "wyhill-guide"
     },
     "antigravity": {
       "display_name": "안티그래비티",
-      "github_account": "",
+      "github_accounts": [],
       "label": "model:안티그래비티",
       "base_branch": "antigravity"
     },
     "cortex-code": {
       "display_name": "코덱스 코드",
-      "github_account": "",
+      "github_accounts": [],
       "label": "model:코덱스 코드",
       "base_branch": "cortex-code"
     }
