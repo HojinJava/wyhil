@@ -29,7 +29,8 @@ jobs:
             // vibe/* 브랜치만 검증
             const match = headBranch.match(/^vibe\/([^\/]+)\/.+/);
             if (!match) {
-              console.log(`ℹ️ vibe 브랜치 아님 (${headBranch}), 검증 건너뜀`);
+              console.log(`[건너뜀] vibe/* 브랜치가 아닙니다 → ${headBranch}`);
+              console.log(`[건너뜀] 관리자 PR 또는 일반 브랜치로 판단하여 검증을 생략합니다.`);
               return;
             }
 
@@ -54,8 +55,16 @@ jobs:
               });
             }
 
+            console.log(`[검사 시작] PR #${prNumber}`);
+            console.log(`  작업 브랜치: ${headBranch}`);
+            console.log(`  대상 브랜치: ${baseBranch}`);
+            console.log(`  작성자: @${author}`);
+            console.log(`  모델 키: ${modelKey}`);
+
             // 검사 1: 등록된 모델인지 확인
+            console.log(`[검사 1/3] 모델 등록 여부 확인 중...`);
             if (!model) {
+              console.log(`[실패] 등록되지 않은 모델: ${modelKey}`);
               await rejectPR(
                 `등록되지 않은 모델입니다: \`${modelKey}\`\n\n` +
                 `\`.github/vibe-models.json\`에 해당 모델이 없습니다.\n` +
@@ -64,8 +73,12 @@ jobs:
               return;
             }
 
+            console.log(`[검사 1/3] 통과 → 등록된 모델 (${model.display_name})`);
+
             // 검사 2: PR 대상 브랜치가 모델 브랜치인지 확인
+            console.log(`[검사 2/3] PR 대상 브랜치 확인 중... (예상: ${modelKey}, 실제: ${baseBranch})`);
             if (baseBranch !== modelKey) {
+              console.log(`[실패] 대상 브랜치 불일치: ${baseBranch} ≠ ${modelKey}`);
               await rejectPR(
                 `PR 대상 브랜치가 올바르지 않습니다.\n\n` +
                 `| 항목 | 값 |\n|------|----|\n` +
@@ -77,9 +90,13 @@ jobs:
               return;
             }
 
+            console.log(`[검사 2/3] 통과 → 대상 브랜치 일치 (${baseBranch})`);
+
             // 검사 3: PR 작성자가 등록된 계정인지 확인 (계정이 설정된 경우만)
             const accounts = model.github_accounts || [];
+            console.log(`[검사 3/3] 작성자 계정 확인 중... (등록된 계정: ${accounts.length > 0 ? accounts.map(a => '@'+a).join(', ') : '없음(검사 생략)'})`);
             if (accounts.length > 0 && !accounts.includes(author)) {
+              console.log(`[실패] 허용되지 않은 작성자: @${author}`);
               await rejectPR(
                 `PR 작성자가 올바르지 않습니다.\n\n` +
                 `| 항목 | 값 |\n|------|----|\n` +
@@ -91,4 +108,6 @@ jobs:
               return;
             }
 
-            console.log(`✅ PR 검증 통과: @${author} → ${model.display_name} (${modelKey})`);
+            console.log(`[검사 3/3] 통과 → 작성자 확인 완료`);
+            console.log(`[완료] PR #${prNumber} 검증 통과`);
+            console.log(`  @${author} → ${model.display_name} (${modelKey}) 브랜치`);
