@@ -2,7 +2,7 @@
   "models": {
     "claude": {
       "display_name": "Claude",
-      "github_accounts": [],
+      "github_accounts": ["HojinJava"],
       "label": "model:Claude",
       "base_branch": "claude"
     },
