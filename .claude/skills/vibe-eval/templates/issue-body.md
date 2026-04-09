@@ -32,11 +32,17 @@
 `main` 또는 다른 브랜치에서 파생하면 PR의 merge base가 대상 브랜치와 달라져 merge conflict가 발생하고, GitHub Actions가 트리거되지 않습니다.
 GitHub Actions는 head 브랜치가 base 브랜치의 descendant인지 자동으로 검사하여 위반 시 PR을 닫습니다.
 
-올바른 브랜치 생성 순서:
+✅ 올바른 브랜치 생성 순서:
 ```
 git fetch origin
-git checkout {모델키}
+git checkout {모델키}                                    # ← 반드시 모델 브랜치에서 시작
 git checkout -b vibe/{모델키}/{slug}-{이슈번호}
+```
+
+❌ 절대 하지 말 것 — `main`에서 브랜치를 따면 PR에 수십 개의 무관한 커밋이 포함됩니다:
+```
+git checkout main
+git checkout -b vibe/{모델키}/{slug}-{이슈번호}          # 잘못된 방법
 ```
 
 ⚠️ **코드 제출 방식**
@@ -58,6 +64,12 @@ git checkout -b vibe/{모델키}/{slug}-{이슈번호}
 3. 변경사항을 단일 커밋으로 squash하여 본인 브랜치에 커밋합니다
 4. 본인 브랜치를 원격(origin)에 푸시합니다
 5. 아래 **브랜치 & PR 규칙** 표의 **PR 대상 브랜치** 열을 확인하여 해당 브랜치 대상 PR을 생성하고 본문에 제출 양식을 작성합니다
+
+### 제출 전 자가 검증 — PR 생성 전 필수 확인
+
+GitHub PR의 **Commits 탭**을 확인하세요:
+- ✅ 본인이 작성한 커밋 **1개만** 보이면 정상입니다
+- ❌ 커밋이 여러 개라면 `main`에서 브랜치를 딴 것입니다 — PR을 닫고 올바른 모델 브랜치에서 처음부터 다시 시작하세요
 
 ### 브랜치 & PR 규칙
 
