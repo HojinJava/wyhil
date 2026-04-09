@@ -173,19 +173,23 @@ Claude Code에서 `/명령어`로 실행하는 프로젝트 전용 관리 커맨
 | `/user-mapping del` | `/user-mapping del <github-user>` | 계정 매핑 해제 |
 | `/w-create-issue` | `/w-create-issue` | 이슈 생성 마법사 (프로젝트·레벨·프롬프트·모델 선택) |
 
-모델 정보는 `.github/vibe-models.json`에서 관리되며, PR 유효성 검사는 `.github/workflows/vibe-pr-validation.yml`에서 자동 실행됩니다.
+모델 정보는 `.github/vibe-models.json`에서 관리됩니다.
 
 ---
 
-### 슬러그 & 네이밍 규칙
+## 자동화 (GitHub Actions)
 
-```
-기능 제목:  mall/codebase-analysis [L2]
-slug:       mall-codebase-analysis
-Issue #:    1
-combined:   mall-codebase-analysis-1
+### PR 유효성 검사 — `vibe-pr-validation.yml`
 
-브랜치:  vibe/claude/mall-codebase-analysis-1
-PR 제목: [Claude] mall/codebase-analysis #1
-세션:    .claude/vibe-sessions/mall-codebase-analysis-1/claude.md
-```
+`vibe/*` 브랜치로 PR이 열릴 때마다 자동 실행됩니다.
+
+| 검사 항목 | 내용 | 실패 시 |
+|-----------|------|---------|
+| 모델 등록 여부 | 브랜치의 모델 키가 `vibe-models.json`에 등록되어 있는지 | PR 자동 close |
+| 대상 브랜치 | PR base가 해당 모델의 전용 브랜치인지 (`vibe/claude/...` → `claude`) | PR 자동 close |
+| 작성자 계정 | PR 작성자가 해당 모델에 등록된 계정인지 (계정 미설정 시 생략) | PR 자동 close |
+
+실패 시 PR에 사유 코멘트가 자동으로 등록되고, PR Checks에 ❌ 로 표시됩니다.  
+브랜치는 삭제되지 않으며 수정 후 재시도할 수 있습니다.
+
+> 계정 등록은 `/user-mapping`, 모델 등록은 `/model add` 커맨드를 사용합니다.
