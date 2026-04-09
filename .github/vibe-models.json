@@ -29,6 +29,12 @@
       "github_accounts": [],
       "label": "model:코덱스 코드",
       "base_branch": "cortex-code"
+    },
+    "codex": {
+      "display_name": "Codex",
+      "github_accounts": [],
+      "label": "model:Codex",
+      "base_branch": "codex"
     }
   }
 }
