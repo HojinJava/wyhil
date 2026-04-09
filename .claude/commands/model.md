@@ -1,17 +1,17 @@
 ---
-name: model
-description: Vibe Eval 모델 추가/삭제. 이 프로젝트 전용. 사용법: /model add <key> | /model del <key>
+name: wyh:model
+description: Vibe Eval 모델 추가/삭제. 이 프로젝트 전용. 사용법: /wyh:model add <key> | /wyh:model del <key>
 ---
 
-# model — Vibe Eval 모델 관리
+# wyh:model — Vibe Eval 모델 관리
 
 프로젝트 전용 명령어. `.github/vibe-models.json`을 기반으로 모델을 추가하거나 제거한다.
 
 ## 사용법
 
 ```
-/model add <key>   — 새 모델 등록
-/model del <key>   — 기존 모델 삭제
+/wyh:model add <key>   — 새 모델 등록
+/wyh:model del <key>   — 기존 모델 삭제
 ```
 
 인수 없이 실행하면 현재 등록된 모델 목록을 출력한다:
@@ -25,7 +25,7 @@ description: Vibe Eval 모델 추가/삭제. 이 프로젝트 전용. 사용법:
 
 ---
 
-## /model add <key>
+## /wyh:model add <key>
 
 ### 실행 순서
 
@@ -111,7 +111,7 @@ git push origin main
 
 ---
 
-## /model del <key>
+## /wyh:model del <key>
 
 ### 실행 순서
 

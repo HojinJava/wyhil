@@ -1,9 +1,9 @@
 ---
-name: user-mapping
-description: Vibe Eval GitHub 협업자↔모델 매핑/해제. 이 프로젝트 전용. 사용법: /user-mapping | /user-mapping del <github-user>
+name: wyh:user-mapping
+description: Vibe Eval GitHub 협업자↔모델 매핑/해제. 이 프로젝트 전용. 사용법: /wyh:user-mapping | /wyh:user-mapping del <github-user>
 ---
 
-# user-mapping — Vibe Eval 사용자 매핑
+# wyh:user-mapping — Vibe Eval 사용자 매핑
 
 프로젝트 전용 명령어. GitHub 협업자와 모델 계정을 연결하거나 해제한다.
 모델 하나에 여러 계정을 등록할 수 있다.
@@ -11,13 +11,13 @@ description: Vibe Eval GitHub 협업자↔모델 매핑/해제. 이 프로젝트
 ## 사용법
 
 ```
-/user-mapping                    — 협업자를 모델에 매핑 (대화형)
-/user-mapping del <github-user>  — 매핑 해제
+/wyh:user-mapping                    — 협업자를 모델에 매핑 (대화형)
+/wyh:user-mapping del <github-user>  — 매핑 해제
 ```
 
 ---
 
-## /user-mapping (인수 없음)
+## /wyh:user-mapping (인수 없음)
 
 ### 실행 순서
 
@@ -88,7 +88,7 @@ git push origin main
 
 ---
 
-## /user-mapping del <github-user>
+## /wyh:user-mapping del <github-user>
 
 ### 실행 순서
 
