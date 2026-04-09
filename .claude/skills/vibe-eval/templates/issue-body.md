@@ -22,9 +22,24 @@
 
 당신의 역할: 공통 프롬프트를 기반으로 코드를 작성하고 PR을 제출합니다.
 
+⚠️ **브랜치 파생 규칙 — 실행 전 반드시 확인**
+
+작업 브랜치는 반드시 **PR 대상 브랜치(`{모델키}`)를 upstream(ancestor)으로** 생성해야 합니다.
+`main` 또는 다른 브랜치에서 파생하면 PR의 merge base가 대상 브랜치와 달라져 merge conflict가 발생하고, GitHub Actions가 트리거되지 않습니다.
+GitHub Actions는 head 브랜치가 base 브랜치의 descendant인지 자동으로 검사하여 위반 시 PR을 닫습니다.
+
+올바른 브랜치 생성 순서:
+```
+git fetch origin
+git checkout {모델키}
+git checkout -b vibe/{모델키}/{slug}-{이슈번호}
+```
+
+코드 변경사항은 **PR을 통해서만** 제출합니다. 직접 push는 어떤 경우에도 허용되지 않습니다.
+
 ### 실행 순서
 
-1. **PR 대상 브랜치(`{모델키}`)를 base로** 작업 브랜치를 생성합니다
+1. **위 브랜치 파생 규칙의 올바른 생성 순서를 따라** 작업 브랜치를 생성합니다
 2. 공통 프롬프트 기반으로 개발을 진행합니다
 3. 변경사항을 단일 커밋으로 squash하여 본인 브랜치에 커밋합니다
 4. 본인 브랜치를 원격(origin)에 푸시합니다
@@ -40,20 +55,6 @@
 | ❌ 금지 | PR 없이 `main`에 merge |
 | ❌ 금지 | 커밋 여러 개로 PR 제출 |
 | ❌ 금지 | `main` 또는 타 모델 브랜치를 base로 작업 브랜치 생성 |
-
-⚠️ **브랜치 파생 규칙 — Actions 통과의 전제 조건**
-
-작업 브랜치는 반드시 **PR 대상 브랜치(`{모델키}`)를 upstream으로** 생성해야 합니다.
-`main` 또는 다른 브랜치에서 파생하면 PR의 merge base가 대상 브랜치와 달라져 merge conflict가 발생하고, GitHub Actions가 트리거되지 않습니다.
-
-올바른 브랜치 생성 순서:
-```
-git fetch origin
-git checkout {모델키}
-git checkout -b vibe/{모델키}/{slug}-{이슈번호}
-```
-
-코드 변경사항은 **PR을 통해서만** 제출합니다. 직접 push는 어떤 경우에도 허용되지 않습니다.
 
 ### 브랜치 & PR 규칙
 

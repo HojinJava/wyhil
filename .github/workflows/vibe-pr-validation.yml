@@ -71,7 +71,7 @@ jobs:
             console.log(`  모델 키: ${modelKey}`);
 
             // 검사 1: 등록된 모델인지 확인
-            console.log(`[검사 1/3] 모델 등록 여부 확인 중...`);
+            console.log(`[검사 1/4] 모델 등록 여부 확인 중...`);
             if (!model) {
               console.log(`[실패] 등록되지 않은 모델: ${modelKey}`);
               await rejectPR(
@@ -82,10 +82,10 @@ jobs:
               return;
             }
 
-            console.log(`[검사 1/3] 통과 → 등록된 모델 (${model.display_name})`);
+            console.log(`[검사 1/4] 통과 → 등록된 모델 (${model.display_name})`);
 
             // 검사 2: PR 대상 브랜치가 모델 브랜치인지 확인
-            console.log(`[검사 2/3] PR 대상 브랜치 확인 중... (예상: ${modelKey}, 실제: ${baseBranch})`);
+            console.log(`[검사 2/4] PR 대상 브랜치 확인 중... (예상: ${modelKey}, 실제: ${baseBranch})`);
             if (baseBranch !== modelKey) {
               console.log(`[실패] 대상 브랜치 불일치: ${baseBranch} ≠ ${modelKey}`);
               await rejectPR(
@@ -99,11 +99,11 @@ jobs:
               return;
             }
 
-            console.log(`[검사 2/3] 통과 → 대상 브랜치 일치 (${baseBranch})`);
+            console.log(`[검사 2/4] 통과 → 대상 브랜치 일치 (${baseBranch})`);
 
             // 검사 3: PR 작성자가 등록된 계정인지 확인 (계정이 설정된 경우만)
             const accounts = model.github_accounts || [];
-            console.log(`[검사 3/3] 작성자 계정 확인 중... (등록된 계정: ${accounts.length > 0 ? accounts.map(a => '@'+a).join(', ') : '없음(검사 생략)'})`);
+            console.log(`[검사 3/4] 작성자 계정 확인 중... (등록된 계정: ${accounts.length > 0 ? accounts.map(a => '@'+a).join(', ') : '없음(검사 생략)'})`);
             if (accounts.length > 0 && !accounts.includes(author)) {
               console.log(`[실패] 허용되지 않은 작성자: @${author}`);
               await rejectPR(
@@ -117,6 +117,47 @@ jobs:
               return;
             }
 
-            console.log(`[검사 3/3] 통과 → 작성자 확인 완료`);
+            console.log(`[검사 3/4] 통과 → 작성자 확인 완료`);
+
+            // 검사 4: head 브랜치가 base 브랜치를 ancestor로 갖는지 확인 (올바른 브랜치 파생 여부)
+            // compareCommits(base, head) 결과:
+            //   "ahead"    → head가 base의 descendant (정상)
+            //   "diverged" → head가 base와 무관한 history를 가짐 (main 등에서 파생된 경우)
+            //   "behind"   → head가 base보다 뒤처짐 (비정상)
+            console.log(`[검사 4/4] 브랜치 파생 관계 확인 중... (${baseBranch} → ${headBranch})`);
+            try {
+              const compareResult = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: baseBranch,
+                head: headBranch
+              });
+              const status = compareResult.data.status;
+              const aheadBy = compareResult.data.ahead_by;
+              const behindBy = compareResult.data.behind_by;
+              console.log(`  비교 결과: ${status} (ahead_by: ${aheadBy}, behind_by: ${behindBy})`);
+              if (status === 'diverged') {
+                console.log(`[실패] head 브랜치가 base 브랜치를 ancestor로 갖지 않음: ${status}`);
+                await rejectPR(
+                  `작업 브랜치가 모델 브랜치(\`${baseBranch}\`)에서 파생되지 않았습니다.\n\n` +
+                  `| 항목 | 값 |\n|------|----|\n` +
+                  `| 작업 브랜치 | \`${headBranch}\` |\n` +
+                  `| PR 대상 브랜치 | \`${baseBranch}\` |\n` +
+                  `| 비교 결과 | \`${status}\` — 두 브랜치가 공통 ancestor를 공유하지 않음 |\n\n` +
+                  `작업 브랜치는 반드시 \`${baseBranch}\`를 upstream으로 생성해야 합니다:\n` +
+                  "```\n" +
+                  `git fetch origin\n` +
+                  `git checkout ${baseBranch}\n` +
+                  `git checkout -b ${headBranch}\n` +
+                  "```"
+                );
+                return;
+              }
+            } catch (e) {
+              // 브랜치 비교 실패 시 경고만 출력하고 통과 (신규 empty 브랜치 등 edge case)
+              console.log(`[경고] 브랜치 비교 API 호출 실패 — 검사 건너뜀: ${e.message}`);
+            }
+
+            console.log(`[검사 4/4] 통과 → 브랜치 파생 관계 확인 완료`);
             console.log(`[완료] PR #${prNumber} 검증 통과`);
             console.log(`  @${author} → ${model.display_name} (${modelKey}) 브랜치`);
