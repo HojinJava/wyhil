@@ -68,9 +68,11 @@ gh api /repos/$REPO/collaborators --jq '.[].login'
 **6. `.github/vibe-models.json` 업데이트**
 해당 모델의 `github_accounts` 배열에 `<github-user>`를 추가한다 (중복 추가 방지).
 
-**7. 커밋 및 push**
+**7. README.md 참여 모델 표 갱신** (→ model.md의 README 싱크 규칙 참고)
+
+**8. 커밋 및 push**
 ```bash
-git add .github/vibe-models.json
+git add .github/vibe-models.json README.md
 git commit -m "chore: map @<github-user> to model <key>"
 git push origin main
 ```
@@ -102,9 +104,11 @@ git push origin main
 
 **3. `github_accounts` 배열에서 `<github-user>` 제거**
 
-**4. 커밋 및 push**
+**4. README.md 참여 모델 표 갱신** (→ model.md의 README 싱크 규칙 참고)
+
+**5. 커밋 및 push**
 ```bash
-git add .github/vibe-models.json
+git add .github/vibe-models.json README.md
 git commit -m "chore: unmap @<github-user> from model <key>"
 git push origin main
 ```
