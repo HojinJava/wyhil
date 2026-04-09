@@ -35,7 +35,13 @@ description: Use when creating a new vibe-eval GitHub issue for this project. Co
 - TITLE_RAW = `{PROJECT}/{FEATURE_NAME}`
 
 **Q3. 프롬프트 레벨**
-"난이도 레벨을 선택하세요: L1 (단순) / L2 (중간) / L3 (복잡)"
+아래 번호로 난이도 레벨을 선택하세요:
+
+```
+1. L1 (단순)
+2. L2 (중간)
+3. L3 (복잡)
+```
 
 - 입력값을 LEVEL로 저장 (L1 / L2 / L3)
 - TITLE = `{TITLE_RAW} [{LEVEL}]`
@@ -82,10 +88,16 @@ gh label list --repo $(gh repo view --json nameWithOwner -q .nameWithOwner)
 프롬프트:
 {COMMON_PROMPT}
 
-이대로 진행할까요? (yes / 수정할 항목 번호)
+1. 진행
+2. 취소
+3. 프로젝트 수정
+4. 기능 이름 수정
+5. 레벨 수정
+6. 프롬프트 수정
+7. 모델 수정
 ```
 
-수정 요청 시 해당 질문만 다시 묻는다.
+수정 번호 선택 시 해당 질문만 다시 묻는다.
 
 ---
 
@@ -127,7 +139,14 @@ cat .github/vibe-models.json
 - 대상 폴더: {TARGET_DIR}
 ```
 
-이미 존재하면 덮어쓰기 전 확인.
+이미 존재하면 덮어쓰기 전 확인:
+
+```
+{SLUG}.md 파일이 이미 존재합니다.
+
+1. 덮어쓰기
+2. 취소
+```
 
 ### 3단계: 라벨 생성 (없으면)
 

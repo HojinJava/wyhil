@@ -32,23 +32,39 @@ description: Vibe Eval 모델 추가/삭제. 이 프로젝트 전용. 사용법:
 **1. 중복 확인**
 `.github/vibe-models.json`을 읽어 `<key>`가 이미 존재하면 중단하고 안내한다.
 
-**2. 추가 정보 수집 (순서대로 하나씩 묻는다)**
-- `display_name`: 화면에 표시될 이름 (예: `Claude`, `Wyhill+지침서`)
-- `label`: GitHub 라벨명 (기본값 제안: `model:<display_name>`)
+**2. display_name 입력**
+"화면에 표시될 이름을 입력하세요. (예: `Claude`, `Wyhill+지침서`)"
 
-**3. 요약 확인**
+자유 입력값을 DISPLAY_NAME으로 저장.
+
+**3. label 입력**
+기본값을 제안하고 번호로 선택받는다:
+
+```
+GitHub 라벨명을 선택하세요:
+1. model:<display_name>  (기본값)
+2. 직접 입력
+```
+
+- 1 선택 시 `model:<display_name>` 사용
+- 2 선택 시 직접 입력받아 저장
+
+**4. 요약 확인**
 ```
 등록 예정 모델:
-- key: <key>
+- key:          <key>
 - display_name: <display_name>
-- label: <label>
-- base_branch: <key>  ← 브랜치도 즉시 생성됩니다
+- label:        <label>
+- base_branch:  <key>  ← 브랜치도 즉시 생성됩니다
 - github_accounts: (미설정)
 
-이대로 진행할까요?
+1. 진행
+2. 취소
+3. display_name 수정
+4. label 수정
 ```
 
-**4. 확인 후 실행**
+**5. 확인 후 실행**
 
 a. 베이스 브랜치 즉시 생성 및 push:
 ```bash
@@ -83,7 +99,7 @@ git commit -m "feat: add vibe model <key> (<display_name>)"
 git push origin main
 ```
 
-**5. 완료 출력**
+**6. 완료 출력**
 ```
 ✅ 모델 등록 완료: <display_name> (<key>)
 - 베이스 브랜치: <key> (생성됨)
@@ -100,25 +116,33 @@ git push origin main
 **1. 존재 확인**
 `.github/vibe-models.json`에 `<key>`가 없으면 중단하고 안내한다.
 
-**2. 정보 표시 및 확인**
+**2. 정보 표시 및 브랜치 삭제 여부 확인**
 ```
 삭제 예정 모델:
-- key: <key>
+- key:          <key>
 - display_name: <display_name>
-- base_branch: <key>
+- base_branch:  <key>
 - github_accounts: <계정 목록 또는 "미설정">
 
-베이스 브랜치(<key>)도 삭제할까요? (yes/no)
-정말 삭제하시겠습니까? (yes/no)
+베이스 브랜치(<key>)도 삭제할까요?
+1. 예
+2. 아니오
 ```
 
-**3. 확인 후 실행**
+**3. 최종 확인**
+```
+정말 삭제하시겠습니까?
+1. 예, 삭제합니다
+2. 아니오, 취소합니다
+```
+
+**4. 확인 후 실행**
 
 a. `.github/vibe-models.json`에서 항목 제거.
 
 b. `issue-body.md` 라벨 예시 줄에서 `` `<label>` `` 제거.
 
-c. (yes 선택 시) 베이스 브랜치 삭제:
+c. (브랜치 삭제 선택 시) 베이스 브랜치 삭제:
 ```bash
 git push origin --delete <key>
 ```
@@ -130,7 +154,7 @@ git commit -m "feat: remove vibe model <key> (<display_name>)"
 git push origin main
 ```
 
-**4. 완료 출력**
+**5. 완료 출력**
 ```
 ✅ 모델 삭제 완료: <display_name> (<key>)
 ```
