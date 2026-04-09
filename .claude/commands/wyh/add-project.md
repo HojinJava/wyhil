@@ -1,18 +1,18 @@
 ---
-name: add-project
-description: Vibe Eval 프로젝트 추가/삭제. 이 프로젝트 전용. 사용법: /add-project | /add-project del <alias>
+name: wyh:add-project
+description: Vibe Eval 프로젝트 추가/삭제. 이 프로젝트 전용. 사용법: /wyh:add-project | /wyh:add-project del <alias>
 ---
 
-# add-project — Vibe Eval 프로젝트 관리
+# wyh:add-project — Vibe Eval 프로젝트 관리
 
 프로젝트 전용 명령어. `.github/vibe-projects.json`을 기반으로 프로젝트를 추가하거나 제거한다.
-프로젝트는 `/w-create-issue` 이슈 생성 시 선택 목록에 표시된다.
+프로젝트는 `/wyh:w-create-issue` 이슈 생성 시 선택 목록에 표시된다.
 
 ## 사용법
 
 ```
-/add-project              — 등록된 프로젝트 목록 출력
-/add-project del <alias>  — 프로젝트 삭제
+/wyh:add-project              — 등록된 프로젝트 목록 출력
+/wyh:add-project del <alias>  — 프로젝트 삭제
 ```
 
 인수 없이 실행하면 현재 등록된 프로젝트 목록을 출력한다:
@@ -84,7 +84,7 @@ git push origin main
 **7. 완료 출력**
 ```
 ✅ 프로젝트 등록 완료: {ALIAS} (폴더: {FOLDER}/)
-이슈 생성 시 /w-create-issue 에서 선택 가능합니다.
+이슈 생성 시 /wyh:w-create-issue 에서 선택 가능합니다.
 ```
 
 ---

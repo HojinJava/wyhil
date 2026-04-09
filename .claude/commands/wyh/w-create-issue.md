@@ -1,9 +1,9 @@
 ---
-name: w-create-issue
+name: wyh:w-create-issue
 description: Use when creating a new vibe-eval GitHub issue for this project. Collects feature prompt information step by step and creates the issue automatically.
 ---
 
-# w-create-issue
+# wyh:w-create-issue
 
 이 프로젝트 전용 스킬. Vibe Eval 이슈 생성에 필요한 정보를 순차적으로 입력받아 feature.md를 작성하고 GitHub Issue를 생성한다.
 
