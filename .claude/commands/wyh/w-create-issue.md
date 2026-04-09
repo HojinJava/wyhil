@@ -93,20 +93,22 @@ REPO = gh repo view --json nameWithOwner -q .nameWithOwner
 
 ### 2단계: feature.md 작성
 
-`feature-definitions/{SLUG}.md` 파일 생성:
+`FEATURE_DEF_PATH = .claude/feature-definitions/{SLUG}.md`
+`FEATURE_DEF_URL = https://github.com/{REPO}/blob/main/.claude/feature-definitions/{SLUG}.md`
 
-```markdown
-# {TITLE}
-
-## 대상 폴더
-{TARGET_DIR}
-
-## 공통 프롬프트
-{COMMON_PROMPT}
-
-## 참여 모델
-{MODELS 각 항목을 "- 모델명" 형식으로}
+MODEL_GIT_COMMANDS 생성 (각 모델마다 아래 형식으로, 빈 줄로 구분):
 ```
+{DISPLAY_NAME} 모델이라면:
+git checkout {MODEL_SLUG} && git checkout -b vibe/{MODEL_SLUG}/{SLUG}-{ISSUE_NUMBER}
+PR 대상: {MODEL_SLUG} / PR 제목: [{DISPLAY_NAME}] {TITLE_CLEAN} \#{ISSUE_NUMBER}
+```
+
+`.claude/skills/vibe-eval/templates/issue-body.md` 플레이스홀더 치환 후 `FEATURE_DEF_PATH`에 저장:
+- `{TITLE}` → TITLE
+- `{COMMON_PROMPT}` → COMMON_PROMPT
+- `{TARGET_DIR}` → TARGET_DIR (없으면 `(미지정)`)
+- `{MODEL_GIT_COMMANDS}` → 생성된 모델별 명령어 블록
+- `{ISSUE_NUMBER}` → `{ISSUE_NUMBER}` (임시)
 
 이미 존재하면 덮어쓰기 전 확인.
 
@@ -117,49 +119,31 @@ gh label create "eval" --color "0075ca" --description "Vibe eval 이슈" 2>/dev/
 gh label create "project:{PROJECT}" --color "e4e669" --description "{PROJECT} 프로젝트" 2>/dev/null || true
 ```
 
-### 4단계: 이슈 본문 구성
+### 4단계: 이슈 생성
 
-`FEATURE_DEF_URL = https://github.com/{REPO}/blob/main/feature-definitions/{SLUG}.md`
-
-MODEL_RULES_TABLE (ISSUE_NUMBER는 플레이스홀더로 먼저 `{ISSUE_NUMBER}` 사용):
-```
-| {MODEL} | `vibe/{MODEL_SLUG}/{SLUG}-{ISSUE_NUMBER}` | `[{MODEL}] {TITLE_CLEAN} \#{ISSUE_NUMBER}` |
-```
-
-`skills/vibe-eval/templates/issue-body.md` 플레이스홀더 치환:
-- `{SLUG}` → SLUG
-- `{FEATURE_DEF_URL}` → FEATURE_DEF_URL
-- `{TARGET_DIR}` → TARGET_DIR (없으면 `(미지정)`)
-- `{MODEL_RULES_TABLE}` → 생성된 테이블
-- `{ISSUE_NUMBER}` → `{ISSUE_NUMBER}` (임시)
-
-### 5단계: 이슈 생성
+이슈 본문은 feature.md 링크 하나만 포함한다.
 
 ```bash
 gh issue create \
   --title "{TITLE}" \
-  --body "{ISSUE_BODY}" \
+  --body "{FEATURE_DEF_URL}" \
   --label "eval" \
   --label "project:{PROJECT}"
 ```
 
-생성된 ISSUE_NUMBER 저장 후 본문의 `{ISSUE_NUMBER}` 플레이스홀더를 실제 번호로 치환:
+생성된 ISSUE_NUMBER 저장 후 feature.md의 `{ISSUE_NUMBER}` 플레이스홀더를 실제 번호로 치환하고 파일 업데이트.
 
-```bash
-gh issue edit {ISSUE_NUMBER} --body "{ISSUE_BODY_FINAL}"
-```
-
-### 6단계: 세션 파일 생성
+### 5단계: 세션 파일 생성
 
 `COMBINED_SLUG = {SLUG}-{ISSUE_NUMBER}`
 
-각 모델에 대해 `vibe-sessions/{COMBINED_SLUG}/{MODEL_FILENAME}.md` 생성.
-`skills/vibe-eval/templates/session.md` 플레이스홀더 치환.
+각 모델에 대해 `.claude/vibe-sessions/{COMBINED_SLUG}/{MODEL_FILENAME}.md` 생성.
+`.claude/skills/vibe-eval/templates/session.md` 플레이스홀더 치환.
 
-### 7단계: 커밋 및 결과 출력
+### 6단계: 커밋 및 결과 출력
 
 ```bash
-git add feature-definitions/{SLUG}.md vibe-sessions/{COMBINED_SLUG}/
+git add .claude/feature-definitions/{SLUG}.md .claude/vibe-sessions/{COMBINED_SLUG}/
 git commit -m "chore: init vibe-eval session for {TITLE} [L{LEVEL}] #{ISSUE_NUMBER}"
 ```
 

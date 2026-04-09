@@ -88,15 +88,11 @@ REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 gh label create "<label>" --color "d93f0b" --repo $REPO 2>/dev/null || echo "라벨 이미 존재"
 ```
 
-d. `issue-body.md` 라벨 예시 줄 업데이트:
-파일 내 `(예: ...)` 부분의 라벨 목록 끝에 `` `<label>` `` 추가.
-대상 줄: `PR 라벨 필수: PR 생성 시 본인 모델명 라벨을 추가합니다 (예: ...)`
+d. README.md 참여 모델 표 갱신 (→ README 싱크 규칙 참고)
 
-e. README.md 참여 모델 표 갱신 (→ README 싱크 규칙 참고)
-
-f. main 브랜치에 커밋 및 push:
+e. main 브랜치에 커밋 및 push:
 ```bash
-git add .github/vibe-models.json .claude/skills/vibe-eval/templates/issue-body.md README.md
+git add .github/vibe-models.json README.md
 git commit -m "feat: add vibe model <key> (<display_name>)"
 git push origin main
 ```
@@ -142,18 +138,16 @@ git push origin main
 
 a. `.github/vibe-models.json`에서 항목 제거.
 
-b. `issue-body.md` 라벨 예시 줄에서 `` `<label>` `` 제거.
-
-c. (브랜치 삭제 선택 시) 베이스 브랜치 삭제:
+b. (브랜치 삭제 선택 시) 베이스 브랜치 삭제:
 ```bash
 git push origin --delete <key>
 ```
 
-d. README.md 참여 모델 표 갱신 (→ README 싱크 규칙 참고)
+c. README.md 참여 모델 표 갱신 (→ README 싱크 규칙 참고)
 
-e. main 브랜치에 커밋 및 push:
+d. main 브랜치에 커밋 및 push:
 ```bash
-git add .github/vibe-models.json .claude/skills/vibe-eval/templates/issue-body.md README.md
+git add .github/vibe-models.json README.md
 git commit -m "feat: remove vibe model <key> (<display_name>)"
 git push origin main
 ```
