@@ -24,12 +24,6 @@
       "label": "model:안티그래비티",
       "base_branch": "antigravity"
     },
-    "cortex-code": {
-      "display_name": "코덱스 코드",
-      "github_accounts": [],
-      "label": "model:코덱스 코드",
-      "base_branch": "cortex-code"
-    },
     "codex": {
       "display_name": "Codex",
       "github_accounts": [],

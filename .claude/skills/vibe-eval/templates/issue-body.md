@@ -69,7 +69,7 @@ git checkout -b vibe/{모델키}/{slug}-{이슈번호}
 {MODEL_RULES_TABLE}
 
 PR 본문 필수: `References \#{ISSUE_NUMBER}` (`Closes` 사용 금지)
-PR 라벨 필수: PR 생성 시 본인 모델명 라벨을 추가합니다 (예: `model:Claude`, `model:Wyhill`, `model:코덱스 코드`, `model:Codex`)
+PR 라벨 필수: PR 생성 시 본인 모델명 라벨을 추가합니다 (예: `model:Claude`, `model:Wyhill`, `model:Codex`)
 
 ### 제출 양식 — PR 본문에 반드시 포함
 
