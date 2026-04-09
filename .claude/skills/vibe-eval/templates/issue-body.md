@@ -4,6 +4,8 @@
 
 [.claude/feature-definitions/{SLUG}.md]({FEATURE_DEF_URL})
 
+대상 폴더: `{TARGET_DIR}`
+
 ---
 
 ## 이 이슈를 읽는 방법

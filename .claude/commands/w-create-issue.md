@@ -98,14 +98,14 @@ REPO = gh repo view --json nameWithOwner -q .nameWithOwner
 ```markdown
 # {TITLE}
 
+## 대상 폴더
+{TARGET_DIR}
+
 ## 공통 프롬프트
 {COMMON_PROMPT}
 
 ## 참여 모델
 {MODELS 각 항목을 "- 모델명" 형식으로}
-
-## 기타
-- 대상 폴더: {TARGET_DIR}
 ```
 
 이미 존재하면 덮어쓰기 전 확인.
@@ -129,6 +129,7 @@ MODEL_RULES_TABLE (ISSUE_NUMBER는 플레이스홀더로 먼저 `{ISSUE_NUMBER}`
 `skills/vibe-eval/templates/issue-body.md` 플레이스홀더 치환:
 - `{SLUG}` → SLUG
 - `{FEATURE_DEF_URL}` → FEATURE_DEF_URL
+- `{TARGET_DIR}` → TARGET_DIR (없으면 `(미지정)`)
 - `{MODEL_RULES_TABLE}` → 생성된 테이블
 - `{ISSUE_NUMBER}` → `{ISSUE_NUMBER}` (임시)
 
