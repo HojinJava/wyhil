@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "mall": {
+      "alias": "mall",
+      "folder": "mall"
+    },
+    "socket": {
+      "alias": "socket",
+      "folder": "supersocket"
+    },
+    "card": {
+      "alias": "card",
+      "folder": "cardstackview"
+    }
+  }
+}

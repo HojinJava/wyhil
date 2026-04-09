@@ -14,22 +14,26 @@ description: Use when creating a new vibe-eval GitHub issue for this project. Co
 ### 질문 순서
 
 **Q1. 프로젝트 선택**
-아래 번호로 프로젝트를 선택하세요:
+`.github/vibe-projects.json`을 읽어 등록된 프로젝트를 번호 목록으로 표시한다:
+
+```bash
+cat .github/vibe-projects.json
+```
 
 ```
-1. mall
-2. socket
-3. card
+프로젝트를 선택하세요:
+1. mall — 폴더: mall/
+2. socket — 폴더: supersocket/
+3. card — 폴더: cardstackview/
+(JSON 파일 순서대로 동적 표시)
 ```
 
 - 입력값을 PROJECT_NUM으로 저장
-- 매핑:
-  - 1 → PROJECT=mall, TARGET_DIR=mall/
-  - 2 → PROJECT=socket, TARGET_DIR=supersocket/
-  - 3 → PROJECT=card, TARGET_DIR=cardstackview/
+- 선택된 항목에서 alias → PROJECT, folder → TARGET_DIR 로 저장
+- 프로젝트가 없으면 `/add-project`로 먼저 등록하라고 안내한다
 
-**Q2. 기능 이름**
-"기능/작업 이름을 입력하세요. (예: `login-feature`, `product-review`)"
+**Q2. 작업 이름**
+"작업 이름을 입력하세요. (예: `login-feature`, `product-review`)"
 
 - 입력값을 FEATURE_NAME으로 저장
 - TITLE_RAW = `{PROJECT}/{FEATURE_NAME}`

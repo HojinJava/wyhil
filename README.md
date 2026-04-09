@@ -174,6 +174,8 @@ Claude Code에서 `/명령어`로 실행하는 프로젝트 전용 관리 커맨
 | `/model del` | `/model del <key>` | 모델 삭제 (브랜치 삭제 여부 선택 가능) |
 | `/user-mapping` | `/user-mapping` | 미매핑 협업자를 모델에 연결 |
 | `/user-mapping del` | `/user-mapping del <github-user>` | 계정 매핑 해제 |
+| `/add-project` | `/add-project` | 프로젝트 등록 (alias + 폴더명) |
+| `/add-project del` | `/add-project del <alias>` | 프로젝트 삭제 |
 | `/w-create-issue` | `/w-create-issue` | 이슈 생성 마법사 (프로젝트·레벨·프롬프트·모델 선택) |
 
 모델 정보는 `.github/vibe-models.json`에서 관리됩니다.
