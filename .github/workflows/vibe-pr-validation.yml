@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   validate:
+    name: "${{ github.event.pull_request.head.ref }} ← ${{ github.event.pull_request.base.ref }} 검증"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
