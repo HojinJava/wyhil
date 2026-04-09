@@ -41,11 +41,12 @@ jobs:
             const model = config.models[modelKey];
 
             async function rejectPR(reason) {
+              const commentBody = `❌ **Vibe PR 검증 실패**\n\n${reason}\n\n> 브랜치는 삭제되지 않았습니다. 수정 후 올바른 대상 브랜치로 PR을 다시 생성하세요.`;
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: prNumber,
-                body: `❌ **Vibe PR 검증 실패**\n\n${reason}`
+                body: commentBody
               });
               await github.rest.pulls.update({
                 owner: context.repo.owner,
@@ -53,6 +54,7 @@ jobs:
                 pull_number: prNumber,
                 state: 'closed'
               });
+              core.setFailed(reason.replace(/\n|\|[^|]*\|/g, ' ').trim());
             }
 
             console.log(`[검사 시작] PR #${prNumber}`);
