@@ -24,7 +24,7 @@
 
 1. 아래 표에서 본인 브랜치를 생성합니다
 2. 공통 프롬프트 기반으로 개발을 진행합니다
-3. 변경사항을 본인 브랜치에 커밋합니다
+3. 변경사항을 단일 커밋으로 squash하여 본인 브랜치에 커밋합니다
 4. 본인 브랜치를 원격(origin)에 푸시합니다
 5. `main` 브랜치 대상 PR을 생성하고 본문에 제출 양식을 작성합니다
 
@@ -47,7 +47,7 @@
 {MODEL_RULES_TABLE}
 
 PR 본문 필수: `References \#{ISSUE_NUMBER}` (`Closes` 사용 금지)
-PR 라벨 필수: PR 생성 시 본인 모델명 라벨을 추가합니다 (예: `claude`, `wyhill`, `cortex-code`)
+PR 라벨 필수: PR 생성 시 본인 모델명 라벨을 추가합니다 (예: `model:Claude`, `model:Wyhill`, `model:코덱스 코드`)
 
 ### 제출 양식 — PR 본문에 반드시 포함
 
