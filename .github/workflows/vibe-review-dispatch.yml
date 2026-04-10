@@ -39,27 +39,39 @@ jobs:
 
             console.log(`[시작] PR #${prNumber}, 모델: ${authorModel}, 이슈: #${issueNumber}`);
 
-            // vibe-models.json 읽기
-            const configRes = await github.rest.repos.getContent({
-              owner, repo,
-              path: '.github/vibe-models.json',
-              ref: context.payload.pull_request.base.repo.default_branch
-            });
-            const config = JSON.parse(Buffer.from(configRes.data.content, 'base64').toString());
-            const allModels = Object.keys(config.models);
+            // vibe-models.json 읽기 (필수 — 실패 시 중단)
+            let config, allModels;
+            try {
+              const configRes = await github.rest.repos.getContent({
+                owner, repo,
+                path: '.github/vibe-models.json',
+                ref: context.payload.pull_request.base.repo.default_branch
+              });
+              config = JSON.parse(Buffer.from(configRes.data.content, 'base64').toString());
+              allModels = Object.keys(config.models);
+            } catch (e) {
+              core.setFailed(`[실패] vibe-models.json 읽기 실패: ${e.message}`);
+              return;
+            }
 
-            // review-task.md 템플릿 읽기
-            const templateRes = await github.rest.repos.getContent({
-              owner, repo,
-              path: '.claude/skills/vibe-eval/templates/review-task.md',
-              ref: context.payload.pull_request.base.repo.default_branch
-            });
-            const template = Buffer.from(templateRes.data.content, 'base64').toString();
+            // review-task.md 템플릿 읽기 (필수 — 실패 시 중단)
+            let template;
+            try {
+              const templateRes = await github.rest.repos.getContent({
+                owner, repo,
+                path: '.claude/skills/vibe-eval/templates/review-task.md',
+                ref: context.payload.pull_request.base.repo.default_branch
+              });
+              template = Buffer.from(templateRes.data.content, 'base64').toString();
+            } catch (e) {
+              core.setFailed(`[실패] review-task.md 템플릿 읽기 실패: ${e.message}`);
+              return;
+            }
 
             // issueTitle: PR 제목에서 [모델명] 접두사 제거
             const issueTitle = prTitle.replace(/^\[[^\]]+\]\s*/, '').replace(/\s*#\d+$/, '').trim();
 
-            // vibe-projects.json 읽기 (루프 밖 — 1회만)
+            // vibe-projects.json 읽기 (루프 밖 — 1회만, 필수 — 실패 시 중단)
             let projects = {};
             try {
               const projectsRes = await github.rest.repos.getContent({
@@ -69,7 +81,8 @@ jobs:
               });
               projects = JSON.parse(Buffer.from(projectsRes.data.content, 'base64').toString()).projects;
             } catch(e) {
-              console.log(`[경고] vibe-projects.json 읽기 실패: ${e.message}`);
+              core.setFailed(`[실패] vibe-projects.json 읽기 실패: ${e.message}`);
+              return;
             }
 
             // 참여 모델 목록: issue-{N}.md가 존재하는 모델 브랜치 파악
@@ -91,7 +104,10 @@ jobs:
                   foundTaskFile = true;
                   foundTargetDir = proj.folder;
                   break;
-                } catch(e) { /* 없으면 다음 프로젝트 */ }
+                } catch(e) {
+                  if (e.status !== 404) console.log(`[경고] ${modelKey}/${proj.folder} 파일 조회 실패: ${e.message}`);
+                  /* 없으면 다음 프로젝트 */
+                }
               }
 
               if (foundTaskFile) {
@@ -107,13 +123,16 @@ jobs:
             }
 
             // 각 참여 모델 브랜치에 review-{N}.md push
+            const prAuthorDisplayName = config.models[authorModel]?.display_name || authorModel;
+            let pushFailed = false;
+
             for (const { modelKey, model, targetDir } of participatingModels) {
               const filePath = `${targetDir}/task/review-${issueNumber}.md`;
               const content = template
                 .replace(/{TITLE}/g, issueTitle)
                 .replace(/{ISSUE_NUMBER}/g, issueNumber)
                 .replace(/{PR_NUMBER}/g, String(prNumber))
-                .replace(/{PR_AUTHOR_MODEL}/g, config.models[authorModel]?.display_name || authorModel)
+                .replace(/{PR_AUTHOR_MODEL}/g, prAuthorDisplayName)
                 .replace(/{OWNER}/g, owner)
                 .replace(/{REPO}/g, repo);
 
@@ -128,7 +147,10 @@ jobs:
                   ref: model.base_branch
                 });
                 sha = existing.data.sha;
-              } catch(e) { /* 신규 파일 */ }
+              } catch(e) {
+                if (e.status !== 404) console.log(`[경고] SHA 조회 실패 (${modelKey}): ${e.message}`);
+                /* 신규 파일 또는 조회 불가 — sha 없이 진행 */
+              }
 
               try {
                 await github.rest.repos.createOrUpdateFileContents({
@@ -141,6 +163,11 @@ jobs:
                 });
                 console.log(`[완료] ${modelKey} 브랜치 → ${filePath}`);
               } catch(e) {
-                console.log(`[실패] ${modelKey} 브랜치 push 실패: ${e.message}`);
+                core.warning(`[실패] ${modelKey} 브랜치 push 실패: ${e.message}`);
+                pushFailed = true;
               }
+            }
+
+            if (pushFailed) {
+              core.setFailed('하나 이상의 모델 브랜치에 review 파일 push 실패');
             }
