@@ -1,0 +1,56 @@
+# DataBase
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    #개발
+    url: jdbc:mariadb://192.168.0.210:13306/mas_dev
+    username: mas_dev
+    password: MAwldnjs!
+    #운영
+    # url: jdbc:mariadb://192.168.0.210:13306/mas
+    # username: mas
+    # password: MAwldnjs!
+
+    hikari:
+      connection-timeout: 5000
+      validation-timeout: 1000
+      maximum-pool-size: 30
+      minimum-idle: 5
+      auto-commit: false
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+hnix:
+  utils:
+    file:
+      location: D:\upload
+      max-file-size: 20480000
+      file-white-list: jpg,png,jpeg,ppt,doc,pdf,hwp,xls,zip,xlsx,pptx,txt,docx
+      buffer-size: 1048576
+  user:
+    consent-temp-days: 30
+    consent-use-days: 1825
+    consent-open-day: 2026-01-12
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: trace
+
+mail:
+  survey:
+    redirect-url: http://localhost:5173/#/pages/survey
+  certificate:
+    redirect-url: http://localhost:5173/#/pages/certificate
+
+  login-url: http://localhost:5173/#/login
+  privacy-url: http://localhost:5173/#/privacy
+
+schedule:
+  cron: 0 0 8 * * *
+  # cron: 0 */1 * * * *
+  use: false
+
+#  user:
+#    cc: [ 'sb.jeon9148@hnix.co.kr', 'tytyes@naver.com' ] ## [willy0408@hnix.co.kr]

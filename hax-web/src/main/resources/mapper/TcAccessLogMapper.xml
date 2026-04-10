@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.log.dao.TcAccessLogDao">
+
+    <select id="countAccessLogs" resultType="int">
+        SELECT COUNT(*) 
+        FROM TC_USER_ACCESS_LOG a
+        WHERE a.ACCESS_DT >= #{startDate} AND a.ACCESS_DT &lt; #{endDate}
+    </select>
+
+    <select id="getAccessLogs" resultType="com.hnix.sd.common.log.dto.AccessLogInfoDto">
+        SELECT 
+            c.COMPANY_NM as companyNm,
+            d.DEPT_NM as deptNm,
+            NULL as manageNm, <!-- Placeholder if manageNm is from another table not clear in JPA -->
+            m.MENU_NM as menuNm,
+            m.MENU_LINK as menuLink,
+            u.USER_NM as userNm,
+            a.USER_ID as userId,
+            a.MENU_CD as menuCd,
+            a.ACCESS_DT as accessDt,
+            a.MENU_TYPE as menuType,
+            a.USER_SESSION_ID as userSessionId,
+            a.USER_IP as userIp
+        FROM TC_USER_ACCESS_LOG a
+        LEFT JOIN TC_USER u ON a.USER_ID = u.USER_ID
+        LEFT JOIN TC_DEPT d ON u.DEPT_CD = d.DEPT_CD
+        LEFT JOIN TC_COMPANY c ON u.COMPANY_CD = c.COMPANY_CD
+        LEFT JOIN TC_MENU m ON a.MENU_CD = m.MENU_CD
+        WHERE a.ACCESS_DT >= #{startDate} AND a.ACCESS_DT &lt; #{endDate}
+        ORDER BY a.ACCESS_DT DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <insert id="insertAccessLog" parameterType="com.hnix.sd.common.log.dto.TcUserAccessLogDto">
+        INSERT INTO TC_USER_ACCESS_LOG (
+            ACCESS_DT, USER_ID, MENU_CD, MENU_TYPE, USER_SESSION_ID, USER_IP
+        ) VALUES (
+            #{accessDt}, #{userId}, #{menuCd}, #{menuType}, #{userSessionId}, #{userIp}
+        )
+    </insert>
+
+</mapper>

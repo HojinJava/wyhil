@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.department.dao.DepartmentDao">
+
+    <select id="existsByDeptCd" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM TC_DEPT
+        WHERE DEPT_CD = #{deptCd}
+    </select>
+
+    <select id="findCompanyTypeCdByDeptCdString" resultType="string">
+        SELECT COMP_TYPE_CD
+        FROM TC_DEPT
+        WHERE DEPT_CD = #{deptCd}
+    </select>
+
+    <!-- DeptRepository -->
+    <select id="findBelongsUserByDept" resultType="string">
+        SELECT DEPT_CD
+        FROM TC_USER
+        WHERE DEPT_CD IN
+        <foreach item="item" collection="deptCodes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="findExistingCodes" resultType="string">
+        SELECT DEPT_CD
+        FROM TC_DEPT
+        WHERE DEPT_CD IN
+        <foreach item="item" collection="deptCodes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="existsByDeptTypeCd" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM TC_DEPT
+        WHERE DEPT_TYPE_CD = #{deptTypeCd}
+    </select>
+
+    <select id="existsByCompanyTypeCd" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM TC_DEPT
+        WHERE COMP_TYPE_CD = #{companyTypeCd}
+    </select>
+
+    <select id="findByDeptCdEntity" resultType="com.hnix.sd.common.department.dto.DepartmentDto">
+        SELECT *
+        FROM TC_DEPT
+        WHERE DEPT_CD = #{deptCd}
+    </select>
+
+    <!-- DeptTreeRepository -->
+    <select id="findTreeByDeptCd" resultType="com.hnix.sd.common.department.dto.DeptTreeDto">
+        WITH RECURSIVE cte AS (
+            SELECT dept_cd, dept_nm, dept_type_cd, prnt_dept_cd, comp_class_cd, comp_type_cd, dept_desc, use_yn, 1 AS level
+            FROM TC_DEPT
+            WHERE dept_cd = #{deptCd}
+            UNION ALL
+            SELECT d.dept_cd, d.dept_nm, d.dept_type_cd, d.prnt_dept_cd, d.comp_class_cd, d.comp_type_cd, d.dept_desc, d.use_yn, 1 + level AS level
+            FROM TC_DEPT d
+            INNER JOIN cte ON cte.prnt_dept_cd = d.dept_cd
+        )
+        SELECT dept_cd, dept_nm, dept_type_cd AS deptTypeCd, prnt_dept_cd AS prntDeptCd, comp_class_cd AS compClassCd, comp_type_cd AS companyTypeCd, dept_desc AS deptDesc, use_yn, level
+        FROM cte
+        ORDER BY level DESC
+    </select>
+
+    <select id="findAllPrntDeptNm" resultType="map">
+        SELECT
+            A.dept_cd AS deptCd,
+            A.dept_nm AS deptNm,
+            A.prnt_dept_cd AS prntDeptCd,
+            B.dept_nm AS prntDeptNm,
+            A.dept_type_cd AS deptTypeCd,
+            A.comp_type_cd AS companyTypeCd,
+            A.comp_class_cd AS compClassCd,
+            A.dept_desc AS deptDesc,
+            A.use_yn AS useYn,
+            0 AS level
+        FROM TC_DEPT A
+        LEFT OUTER JOIN TC_DEPT B ON A.PRNT_DEPT_CD = B.DEPT_CD
+    </select>
+
+    <select id="findAllPrntDeptNmByDeptCd" resultType="map">
+        SELECT
+            A.dept_cd AS deptCd,
+            A.dept_nm AS deptNm,
+            A.prnt_dept_cd AS prntDeptCd,
+            B.dept_nm AS prntDeptNm,
+            A.dept_type_cd AS deptTypeCd,
+            A.comp_type_cd AS companyTypeCd,
+            A.comp_class_cd AS compClassCd,
+            A.dept_desc AS deptDesc,
+            A.use_yn AS useYn,
+            0 AS level
+        FROM TC_DEPT A
+        LEFT OUTER JOIN TC_DEPT B ON A.PRNT_DEPT_CD = B.DEPT_CD
+        WHERE A.dept_cd IN
+        <foreach item="item" collection="deptCd" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY A.dept_cd
+    </select>
+
+    <select id="findTreeByCompanyTypeCd" resultType="com.hnix.sd.common.department.dto.DeptTreeDto">
+        SELECT *
+        FROM v_dept_level
+        WHERE COMP_TYPE_CD = #{companyTypeCd}
+    </select>
+
+    <!-- DeptResourceRepository -->
+    <select id="findByDeptFromCodeEntity" resultType="map">
+        SELECT c.dept_nm AS company, d.dept_cd, d.dept_nm, d.dept_type_cd, d.prnt_dept_cd, d.comp_class_cd, d.comp_type_cd, d.dept_desc, d.use_yn
+        FROM TC_DEPT d
+        JOIN TC_DEPT c ON d.prnt_dept_cd = c.dept_cd
+        WHERE d.dept_cd = #{deptCd}
+    </select>
+
+    <select id="findDeptWithCompanyNameEntity" resultType="map">
+        SELECT func_find_company(dept_cd) AS company, dept_cd, dept_nm, dept_type_cd, prnt_dept_cd, comp_class_cd, comp_type_cd, dept_desc, use_yn
+        FROM TC_DEPT
+    </select>
+
+    <select id="findByCompany" resultType="com.hnix.sd.common.department.dto.DepartmentDto">
+        SELECT *
+        FROM TC_DEPT
+        WHERE DEPT_TYPE_CD = 'C'
+    </select>
+
+    <select id="findByDeptWithCompany" resultType="com.hnix.sd.common.department.dto.DepartmentDto">
+        SELECT *
+        FROM TC_DEPT
+        WHERE DEPT_CD = #{deptCd} OR PRNT_DEPT_CD = #{deptCd}
+    </select>
+
+    <select id="findAllDepartmentEntity" resultType="map">
+        SELECT c.dept_nm AS company, d.dept_cd, d.dept_nm, d.dept_type_cd, d.prnt_dept_cd, d.comp_class_cd, d.comp_type_cd, d.dept_desc, d.use_yn
+        FROM TC_DEPT d
+        JOIN TC_DEPT c ON d.prnt_dept_cd = c.dept_cd
+        WHERE d.dept_type_cd = 'D'
+          AND d.prnt_dept_cd IS NOT NULL
+          AND (CASE WHEN #{compTypeCd} IN ('C','P') THEN (d.comp_type_cd = #{compTypeCd}) ELSE (1 = 1) END)
+    </select>
+
+    <select id="findByDeptFromKeywordEntity" resultType="map">
+        SELECT c.dept_nm AS company, d.dept_cd, d.dept_nm, d.dept_type_cd, d.prnt_dept_cd, d.comp_class_cd, d.comp_type_cd, d.dept_desc, d.use_yn
+        FROM TC_DEPT d
+        JOIN TC_DEPT c ON d.prnt_dept_cd = c.dept_cd
+        WHERE d.dept_type_cd = 'D'
+          AND d.prnt_dept_cd IS NOT NULL
+          AND (d.dept_nm LIKE CONCAT('%', #{keyword}, '%') OR c.dept_nm LIKE CONCAT('%', #{keyword}, '%'))
+    </select>
+
+    <!-- DepartmentStructureRepository -->
+    <select id="findByDeptFromCompanyCd" resultType="com.hnix.sd.common.department.dto.DepartmentStructureDto">
+        SELECT *
+        FROM v_organization_structure
+        WHERE COMPANY_CD = #{companyCd} AND DEPT_TYPE_CD != 'C'
+    </select>
+
+    <select id="findByDeptTypeNotCompany" resultType="com.hnix.sd.common.department.dto.DepartmentStructureDto">
+        SELECT *
+        FROM v_organization_structure
+        WHERE DEPT_TYPE_CD != 'C'
+    </select>
+
+    <select id="findStructureByDeptTypeCd" resultType="com.hnix.sd.common.department.dto.DepartmentStructureDto">
+        SELECT *
+        FROM v_organization_structure
+        WHERE DEPT_TYPE_CD = #{deptTypeCd}
+    </select>
+
+    <select id="findByCompanyCdFromDeptCdString" resultType="string">
+        SELECT COMPANY_CD
+        FROM v_organization_structure
+        WHERE ORIGIN_CD = #{deptCd}
+    </select>
+
+    <insert id="insertDepartment">
+        INSERT INTO TC_DEPT (
+            DEPT_CD, DEPT_NM, DEPT_TYPE_CD, DEPT_DESC, PRNT_DEPT_CD, COMP_CLASS_CD, COMP_TYPE_CD, USE_YN, REG_ID, REG_DT
+        ) VALUES (
+            #{deptCd}, #{deptNm}, #{deptTypeCd}, #{deptDesc}, #{prntDeptCd}, #{compClassCd}, #{companyTypeCd}, #{useYn}, #{regId}, #{regDt}
+        )
+    </insert>
+
+    <update id="updateDepartment">
+        UPDATE TC_DEPT
+        SET DEPT_NM = #{deptNm},
+            DEPT_TYPE_CD = #{deptTypeCd},
+            DEPT_DESC = #{deptDesc},
+            PRNT_DEPT_CD = #{prntDeptCd},
+            COMP_CLASS_CD = #{compClassCd},
+            COMP_TYPE_CD = #{companyTypeCd},
+            USE_YN = #{useYn},
+            MOD_ID = #{modId},
+            MOD_DT = #{modDt}
+        WHERE DEPT_CD = #{deptCd}
+    </update>
+
+    <delete id="deleteByDeptCd">
+        DELETE FROM TC_DEPT
+        WHERE DEPT_CD = #{deptCd}
+    </delete>
+
+    <delete id="deleteByDeptCds">
+        DELETE FROM TC_DEPT
+        WHERE DEPT_CD IN
+        <foreach item="item" collection="deptCds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

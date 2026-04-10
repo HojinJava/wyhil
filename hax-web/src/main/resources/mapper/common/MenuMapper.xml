@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.menu.dao.MenuDao">
+
+    <resultMap id="MenuResultMap" type="com.hnix.sd.common.menu.dto.MenuDto">
+        <id property="menuCd" column="MENU_CD"/>
+        <result property="menuNm" column="MENU_NM"/>
+        <result property="menuDesc" column="MENU_DESC"/>
+        <result property="menuLink" column="MENU_LINK"/>
+        <result property="menuLevel" column="MENU_LEVEL"/>
+        <result property="menuSort" column="MENU_SORT"/>
+        <result property="prntMenuCd" column="PRNT_MENU_CD"/>
+        <result property="useYn" column="USE_YN"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modDt" column="MOD_DT"/>
+    </resultMap>
+
+    <select id="findAllByOrderByMenuLevelAscMenuSortAsc" resultMap="MenuResultMap">
+        SELECT * FROM TC_MENU ORDER BY MENU_LEVEL ASC, MENU_SORT ASC
+    </select>
+
+    <select id="findByMenuCdEntity" resultMap="MenuResultMap">
+        SELECT * FROM TC_MENU WHERE MENU_CD = #{menuCd}
+    </select>
+
+    <select id="findExistingCodes" resultType="java.lang.String">
+        SELECT MENU_CD FROM TC_MENU WHERE MENU_CD IN
+        <foreach item="code" collection="menuCodes" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </select>
+
+    <insert id="insertMenu" parameterType="com.hnix.sd.common.menu.dto.MenuDto">
+        INSERT INTO TC_MENU (MENU_CD, MENU_NM, MENU_DESC, MENU_LINK, MENU_LEVEL, MENU_SORT, PRNT_MENU_CD, USE_YN, REG_ID, MOD_ID, REG_DT, MOD_DT)
+        VALUES (#{menuCd}, #{menuNm}, #{menuDesc}, #{menuLink}, #{menuLevel}, #{menuSort}, #{prntMenuCd}, #{useYn}, #{regId}, #{modId}, #{regDt}, #{modDt})
+    </insert>
+
+    <update id="updateMenu" parameterType="com.hnix.sd.common.menu.dto.MenuDto">
+        UPDATE TC_MENU SET
+            MENU_NM = #{menuNm},
+            MENU_DESC = #{menuDesc},
+            MENU_LINK = #{menuLink},
+            MENU_LEVEL = #{menuLevel},
+            MENU_SORT = #{menuSort},
+            PRNT_MENU_CD = #{prntMenuCd},
+            USE_YN = #{useYn},
+            MOD_ID = #{modId},
+            MOD_DT = #{modDt}
+        WHERE MENU_CD = #{menuCd}
+    </update>
+
+    <delete id="deleteByMenuCds">
+        DELETE FROM TC_MENU WHERE MENU_CD IN
+        <foreach item="menuCd" collection="menuCds" open="(" separator="," close=")">
+            #{menuCd}
+        </foreach>
+    </delete>
+
+</mapper>

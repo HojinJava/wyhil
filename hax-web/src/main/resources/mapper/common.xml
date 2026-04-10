@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.dao.CommonkDao">
+
+	<select id="getCommonCode" parameterType="map" resultType="map">
+
+		select code_cd, code_text
+
+		from tc_common_code
+		where use_yn = 'Y'
+		and code_cd != '*'
+		and code_group_cd = #{group_cd}
+
+		order by code_seq asc
+	</select>
+
+</mapper>
