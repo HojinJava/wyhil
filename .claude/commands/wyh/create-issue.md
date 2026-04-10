@@ -1,9 +1,9 @@
 ---
-name: wyh:w-create-issue
+name: wyh:create-issue
 description: Use when creating a new vibe-eval GitHub issue for this project. Collects feature prompt information step by step and creates the issue automatically.
 ---
 
-# wyh:w-create-issue
+# wyh:create-issue
 
 이 프로젝트 전용 스킬. Vibe Eval 이슈 생성에 필요한 정보를 순차적으로 입력받아 feature.md를 작성하고 GitHub Issue를 생성한다.
 
@@ -13,39 +13,52 @@ description: Use when creating a new vibe-eval GitHub issue for this project. Co
 
 ### 질문 순서
 
-**Q1. 기능 제목**
-"기능/작업 이름을 입력하세요. (예: `mall/login-feature`, `mall/product-review`)"
+**Q1. 대상 프로젝트**
+`.github/vibe-projects.json`을 읽어 등록된 프로젝트 목록을 숫자로 표시한다:
+
+```
+대상 프로젝트를 선택하세요:
+1. mall  (mall/)
+2. socket  (supersocket/)
+3. card  (cardstackview/)
+```
+
+등록된 프로젝트가 없으면 `/wyh:add-project`로 먼저 등록하라고 안내하고 중단한다.
+
+- 선택한 번호의 `alias`를 PROJECT_ALIAS로, `folder`를 TARGET_DIR로 저장
+
+**Q2. 기능 제목(영어)**
+"기능 이름을 영어로 입력하세요. (예: `login-feature`, `product-review`)"
 
 - 입력값을 TITLE_RAW로 저장
-- 형식: `{project}/{feature-name}` 권장 (슬래시 포함 가능)
 
-**Q2. 프롬프트 레벨**
+**Q3. 프롬프트 레벨**
 "난이도 레벨을 선택하세요: L1 (단순) / L2 (중간) / L3 (복잡)"
 
 - 입력값을 LEVEL로 저장 (L1 / L2 / L3)
-- TITLE = `{TITLE_RAW} [{LEVEL}]`
+- TITLE = `{PROJECT_ALIAS}/{TITLE_RAW} [{LEVEL}]`
 
-**Q3. 공통 프롬프트**
+**Q4. 공통 프롬프트**
 "AI 모델에게 전달할 공통 프롬프트를 입력하세요. (여러 줄 가능, 입력 완료 후 알려주세요)"
 
 - 입력값을 COMMON_PROMPT로 저장
 
-**Q4. 대상 폴더**
-"작업 대상 폴더를 입력하세요. (예: `mall/`, `src/`, 없으면 Enter)"
-
-- 입력값을 TARGET_DIR로 저장 (없으면 생략)
-
 **Q5. 참여 모델**
-현재 레포에 등록된 모델 라벨 목록을 보여준다:
-```
-gh label list --repo $(gh repo view --json nameWithOwner -q .nameWithOwner)
-```
-에서 `model:` 접두사 라벨을 필터링해 목록 표시.
+현재 레포에 등록된 `model:` 접두사 라벨을 읽어 숫자 목록으로 표시한다:
 
-"참여 모델을 선택하세요 (쉼표로 구분, 예: `Claude, Wyhill, 안티그래비티`). 전체 선택은 `전부`"
+```
+참여 모델을 선택하세요:
+1. 전체
+2. Claude
+3. Wyhill
+4. 안티그래비티
+...
+```
+
+번호 하나 또는 쉼표로 구분한 여러 번호를 입력받는다. (예: `2,3`)  
+`1` 선택 시 모든 모델 선택.
 
 - 입력값을 MODELS 리스트로 저장
-- `전부` 입력 시 model: 라벨 전체 선택
 
 **Q6. 확인**
 수집한 정보를 요약해서 보여주고 확인을 요청한다:
@@ -55,7 +68,7 @@ gh label list --repo $(gh repo view --json nameWithOwner -q .nameWithOwner)
 
 제목:   {TITLE}
 레벨:   {LEVEL}
-폴더:   {TARGET_DIR}
+프로젝트: {PROJECT_ALIAS} ({TARGET_DIR}/)
 모델:   {MODELS 목록}
 
 프롬프트:
@@ -77,7 +90,7 @@ gh label list --repo $(gh repo view --json nameWithOwner -q .nameWithOwner)
 ```
 TITLE_CLEAN = TITLE에서 ' [L{n}]' 제거  (예: mall/login-feature)
 SLUG = TITLE_CLEAN의 '/' → '-' 치환     (예: mall-login-feature)
-PROJECT = SLUG의 첫 번째 '-' 앞 부분    (예: mall)
+PROJECT = PROJECT_ALIAS                  (예: mall)
 REPO = gh repo view --json nameWithOwner -q .nameWithOwner
 ```
 
