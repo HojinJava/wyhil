@@ -11,5 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MallAdminApplication {
     public static void main(String[] args) {
         SpringApplication.run(MallAdminApplication.class, args);
+        System.out.println("🚀 [SUCCESS] 서버가 실행됩니다! 🚀");
     }
 }
