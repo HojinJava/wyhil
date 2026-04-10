@@ -11,6 +11,10 @@
     "card": {
       "alias": "card",
       "folder": "cardstackview"
+    },
+    "hax-web": {
+      "alias": "hax-web",
+      "folder": "hax-web"
     }
   }
 }
