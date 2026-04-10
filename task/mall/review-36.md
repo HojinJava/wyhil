@@ -2,10 +2,10 @@
 
 ## 리뷰할 PR
 
-PR #39 — 안티그래비티 모델 작업물
+PR #42 — Codex 모델 작업물
 
 아래 명령으로 PR 내용을 확인한다.
-gh pr view 39 --repo HojinJava/wyhil
+gh pr view 42 --repo HojinJava/wyhil
 
 ## 평가 기준
 
@@ -17,7 +17,7 @@ gh pr view 39 --repo HojinJava/wyhil
 
 ## 제출 방식
 
-평가 완료 후 아래 양식을 PR #39 댓글로 등록한다.
+평가 완료 후 아래 양식을 PR #42 댓글로 등록한다.
 
 종합 평점: /5
 공통 프롬프트 이행 (1~5):
@@ -38,6 +38,7 @@ gh pr view 39 --repo HojinJava/wyhil
 PR 댓글 등록이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
 
 ```
+mkdir -p task_done/mall
 git mv task/mall/review-36.md task_done/mall/review-36.md
 git commit -m "chore: move review-36 task to task_done"
 git push origin claude
