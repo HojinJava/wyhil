@@ -241,6 +241,7 @@ Claude Code에서 `/명령어`로 실행하는 프로젝트 전용 관리 커맨
 | 커맨드 | 설명 |
 |--------|------|
 | `/wyh:create-issue` | 이슈 생성 마법사 (프로젝트 → 제목 → 레벨 → 프롬프트 → 모델) |
+| `/w-bulk-create-issue <file.json>` | JSON 파일로 이슈 일괄 생성 |
 | `/wyh:model` | 등록된 모델 목록 확인 |
 | `/wyh:model add <key>` | 새 모델 등록 + 브랜치 자동 생성 + GitHub 라벨 생성 |
 | `/wyh:model del <key>` | 모델 삭제 |
@@ -249,7 +250,7 @@ Claude Code에서 `/명령어`로 실행하는 프로젝트 전용 관리 커맨
 | `/wyh:add-project` | 프로젝트 등록 (alias + 폴더명) |
 | `/wyh:add-project del <alias>` | 프로젝트 삭제 |
 
-커맨드 파일 위치: `.claude/commands/wyh/`
+커맨드 파일 위치: `.claude/commands/`
 
 ---
 
