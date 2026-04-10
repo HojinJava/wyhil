@@ -74,10 +74,15 @@ description: Use when creating a new vibe-eval GitHub issue for this project. Co
 프롬프트:
 {COMMON_PROMPT}
 
-이대로 진행할까요? (yes / 수정할 항목 번호)
+1. 확인
+2. 프로젝트 수정
+3. 기능 제목 수정
+4. 레벨 수정
+5. 프롬프트 수정
+6. 참여 모델 수정
 ```
 
-수정 요청 시 해당 질문만 다시 묻는다.
+`1` 입력 시 진행, `2~6` 입력 시 해당 질문만 다시 묻는다.
 
 ---
 
