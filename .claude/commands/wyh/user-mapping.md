@@ -74,10 +74,15 @@ gh api "repos/$REPO/collaborators" --jq '.[].login'
 **6. README.md 참여 모델 표 갱신** (→ model.md의 README 싱크 규칙 참고)
 
 **7. 커밋 및 push**
+
+워킹 트리에 미커밋 변경사항이 있을 수 있으므로 stash로 임시 저장 후 pull한다:
+
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "chore: map @<github-user> to model <key>"
+STASH_RESULT=$(git stash --include-untracked 2>&1)
 git pull --rebase origin main
+echo "$STASH_RESULT" | grep -q "No local changes to stash" || git stash pop
 git push origin main
 ```
 
@@ -111,10 +116,13 @@ git push origin main
 **4. README.md 참여 모델 표 갱신** (→ model.md의 README 싱크 규칙 참고)
 
 **5. 커밋 및 push**
+
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "chore: unmap @<github-user> from model <key>"
+STASH_RESULT=$(git stash --include-untracked 2>&1)
 git pull --rebase origin main
+echo "$STASH_RESULT" | grep -q "No local changes to stash" || git stash pop
 git push origin main
 ```
 

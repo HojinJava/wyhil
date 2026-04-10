@@ -94,7 +94,9 @@ e. main 브랜치에 커밋 및 push:
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "feat: add vibe model <key> (<display_name>)"
+STASH_RESULT=$(git stash --include-untracked 2>&1)
 git pull --rebase origin main
+echo "$STASH_RESULT" | grep -q "No local changes to stash" || git stash pop
 git push origin main
 ```
 
@@ -150,7 +152,9 @@ d. main 브랜치에 커밋 및 push:
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "feat: remove vibe model <key> (<display_name>)"
+STASH_RESULT=$(git stash --include-untracked 2>&1)
 git pull --rebase origin main
+echo "$STASH_RESULT" | grep -q "No local changes to stash" || git stash pop
 git push origin main
 ```
 
