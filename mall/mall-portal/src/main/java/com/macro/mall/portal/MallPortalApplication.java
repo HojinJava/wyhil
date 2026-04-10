@@ -8,6 +8,7 @@ public class MallPortalApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MallPortalApplication.class, args);
+        System.out.println("🚀 서버가 실행됩니다.");
     }
 
 }
