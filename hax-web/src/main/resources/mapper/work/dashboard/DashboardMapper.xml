@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.dashboard.dao.DashboardDao">
+
+    <select id="findByCompCdAndYearAndMonth" resultType="[Ljava.lang.Object;">
+        select 
+            his.SERVICE_NO, 
+            his.CONTRACT_NO, 
+            his.REQ_DT, 
+            part.COMP_CD, 
+            dept.DEPT_NM, 
+            cont.DEPT_CD, 
+            org.company_cd, 
+            org.company_nm,
+            (select POINT_SUM from ts_work_survey where SERVICE_NO = his.SERVICE_NO) survey_sum,
+            part.REGULAR_SERVICE_CD,
+            code1.CODE_TEXT,
+            his.SERVICE_CD,
+            code2.CODE_TEXT 
+        from ts_work_history his
+        left join ts_work_sw_partner part on part.SUB_CD = his.SUB_CD 
+        left join tc_dept dept on dept.DEPT_CD = part.COMP_CD 
+        left join ts_work_sw_contract cont on cont.CONTRACT_NO = his.CONTRACT_NO 
+        left join v_organization_structure org on org.origin_cd = cont.DEPT_CD 
+        left join tc_common_code code1 on code1.CODE_CD = part.REGULAR_SERVICE_CD 
+        left join tc_common_code code2 on code2.CODE_CD = his.SERVICE_CD
+        where part.COMP_CD = #{dto.partnerCode}
+          and org.company_cd like concat('%', #{dto.customerCode}, '%')
+          and year(his.REQ_DT) = #{dto.searchYear}
+          and month(his.REQ_DT) between #{dto.startDate} and #{dto.endDate}
+    </select>
+
+    <select id="findBySearchYear" resultType="[Ljava.lang.Object;">
+        SELECT 
+            org.company_cd,
+            org.company_nm,
+            SUM(
+                CASE part.REGULAR_SERVICE_CD
+                    WHEN 'SERVICE_ITEM_CUSTOM' THEN ((12+1)-7)
+                    WHEN 'REGULAR_SERVICE_QUARTER' THEN ((12+1)-7) / 3
+                    WHEN 'REGULAR_SERVICE_HALF' THEN ((12+1)-7) / 6
+                    WHEN 'REGULAR_SERVICE_YEAR' THEN ((12+1)-7) / 12
+                    ELSE 0
+                END
+            ) AS TOTAL_REGULAR_PLAN_CNT
+        FROM ts_work_sw_contract cont
+        JOIN ts_work_sw_partner part 
+            ON part.sub_cd = cont.sub_cd
+        LEFT JOIN v_organization_structure org
+            ON org.origin_cd = cont.DEPT_CD
+        WHERE cont.CONTRACT_YEAR = #{searchYear}
+          AND MONTH(cont.CONTRACT_ST_DT) >= 7
+          AND MONTH(cont.CONTRACT_ED_DT) &lt;= 12
+        GROUP BY org.company_cd, org.company_nm
+        ORDER BY org.company_cd
+    </select>
+
+    <select id="findByCompanyCd" resultType="[Ljava.lang.Object;">
+        select DISTINCT  a.company_nm, a.company_cd  from v_organization_structure a 
+        WHERE a.dept_type_cd = 'C' 
+          and a.comp_type_cd  = 'C'
+        ORDER BY a.company_cd
+    </select>
+
+</mapper>

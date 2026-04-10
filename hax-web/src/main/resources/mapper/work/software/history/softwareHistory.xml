@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.software.history.dao.SoftwareHistoryDao">
+
+    <resultMap id="SoftwareHistoryResultMap" type="com.hnix.sd.work.software.history.dto.SoftwareHistoryDto">
+        <id property="historyId" column="HIS_ID"/>
+        <result property="contractNo" column="CONTRACT_NO"/>
+        <result property="hisDt" column="HIS_DT"/>
+        <result property="historyTypeCd" column="HIS_TYPE_CD"/>
+        <result property="historySeq" column="HIS_SEQ"/>
+        <result property="historyContents" column="HIS_CONTENTS"/>
+        <result property="remark" column="REMARK"/>
+        <result property="fileId" column="FILE_ID"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="useYn" column="USE_YN"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="modDt" column="MOD_DT"/>
+    </resultMap>
+
+    <select id="findById" resultMap="SoftwareHistoryResultMap">
+        SELECT * FROM TS_MA_HISTORY WHERE HIS_ID = #{historyId}
+    </select>
+
+    <select id="findByContractNo" resultMap="SoftwareHistoryResultMap">
+        SELECT * FROM TS_MA_HISTORY WHERE CONTRACT_NO = #{contractNo} AND USE_YN = 'Y' ORDER BY HIS_SEQ DESC
+    </select>
+
+    <select id="countByContractNo" resultType="int">
+        SELECT COUNT(*) FROM TS_MA_HISTORY WHERE CONTRACT_NO = #{contractNo} AND USE_YN = 'Y'
+    </select>
+
+    <insert id="insertHistory">
+        INSERT INTO TS_MA_HISTORY (
+            HIS_ID, CONTRACT_NO, HIS_DT, HIS_TYPE_CD, HIS_SEQ, HIS_CONTENTS, 
+            REMARK, FILE_ID, REG_ID, USE_YN, REG_DT
+        ) VALUES (
+            #{historyId}, #{contractNo}, #{hisDt}, #{historyTypeCd}, #{historySeq}, #{historyContents},
+            #{remark}, #{fileId}, #{regId}, #{useYn}, NOW()
+        )
+    </insert>
+
+    <update id="updateHistory">
+        UPDATE TS_MA_HISTORY
+           SET HIS_SEQ = #{historySeq},
+               HIS_CONTENTS = #{historyContents},
+               FILE_ID = #{fileId},
+               MOD_ID = #{modId},
+               MOD_DT = NOW()
+         WHERE HIS_ID = #{historyId}
+    </update>
+
+    <update id="updateHistoryUseYn">
+        UPDATE TS_MA_HISTORY SET USE_YN = 'N' WHERE HIS_ID = #{historyId}
+    </update>
+
+    <!-- 복잡??조인 ?�이�?조회 (QueryDSL ?��? -->
+    <select id="findSoftwareHistoryByPagination" resultType="com.hnix.sd.work.software.history.dto.HistoryGridInfoDto">
+        SELECT
+            h.HIS_ID as historyId,
+            h.CONTRACT_NO as contractNo,
+            c.CONTRACT_YEAR as contractYear,
+            c.SUB_CD as subCd,
+            s.SW_NM as swName,
+            cust.COMPANY_NM as customerCompanyNm,
+            cust.DEPARTMENT_NM as customerDepartmentNm,
+            cust.MANAGE_NM as customerManageNm,
+            c.DEPT_CD as customerDeptCd,
+            part.COMPANY_NM as partnerCompanyNm,
+            p.COMP_CD as partnerDeptCd,
+            h.HIS_SEQ as historySeq,
+            h.HIS_TYPE_CD as historyTypeCd,
+            h.HIS_CONTENTS as historyContents
+        FROM TS_MA_HISTORY h
+        INNER JOIN TS_WORK_SW_CONTRACT c ON h.CONTRACT_NO = c.CONTRACT_NO
+        INNER JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CD
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON c.DEPT_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE part ON p.COMP_CD = part.ORIGIN_CD
+        WHERE h.USE_YN = 'Y'
+        <if test="contractYear != null and contractYear != ''">
+            AND c.CONTRACT_YEAR = #{contractYear}
+        </if>
+        <if test="customer != null and customer != ''">
+            AND cust.COMPANY_CD = #{customer}
+        </if>
+        <if test="department != null and department != ''">
+            AND cust.MANAGE_CD = #{department}
+        </if>
+        <if test="partner != null and partner != ''">
+            AND part.COMPANY_CD = #{partner}
+        </if>
+        <if test="swName != null and swName != ''">
+            AND s.SW_NM LIKE CONCAT('%', #{swName}, '%')
+        </if>
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                ORDER BY ${sortBy}
+            </when>
+            <otherwise>
+                ORDER BY h.REG_DT DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countSoftwareHistoryByPagination" resultType="long">
+        SELECT COUNT(*)
+        FROM TS_MA_HISTORY h
+        INNER JOIN TS_WORK_SW_CONTRACT c ON h.CONTRACT_NO = c.CONTRACT_NO
+        INNER JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CD
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON c.DEPT_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE part ON p.COMP_CD = part.ORIGIN_CD
+        WHERE h.USE_YN = 'Y'
+        <if test="contractYear != null and contractYear != ''">
+            AND c.CONTRACT_YEAR = #{contractYear}
+        </if>
+        <if test="customer != null and customer != ''">
+            AND cust.COMPANY_CD = #{customer}
+        </if>
+        <if test="department != null and department != ''">
+            AND cust.MANAGE_CD = #{department}
+        </if>
+        <if test="partner != null and partner != ''">
+            AND part.COMPANY_CD = #{partner}
+        </if>
+        <if test="swName != null and swName != ''">
+            AND s.SW_NM LIKE CONCAT('%', #{swName}, '%')
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.history.dao.CommonHistoryDao">
+
+    <insert id="insert" parameterType="com.hnix.sd.common.history.dto.CommonHistoryDto">
+        INSERT INTO TC_COMMON_HISTORY (
+            TARGET_ID, MENU_CD, HIS_DT, HIS_TYPE_CD, HIS_CONTENTS, USER_ID, FILE_ID
+        ) VALUES (
+            #{targetId}, #{menuCd}, #{hisDt}, #{hisTypeCd}, #{hisContents}, #{userId}, #{fileId}
+        )
+    </insert>
+
+    <insert id="insertCommonHistory" parameterType="com.hnix.sd.common.history.dto.CommonHistoryDto">
+        INSERT INTO TC_COMMON_HISTORY (
+            TARGET_ID, MENU_CD, HIS_DT, HIS_TYPE_CD, HIS_CONTENTS, USER_ID, FILE_ID
+        ) VALUES (
+            #{targetId}, #{menuCd}, #{hisDt}, #{hisTypeCd}, #{hisContents}, #{userId}, #{fileId}
+        )
+    </insert>
+
+    <select id="findByTargetIdAndMenuCd" resultType="com.hnix.sd.common.history.dto.CommonHistoryDto">
+        SELECT *
+        FROM TC_COMMON_HISTORY
+        WHERE TARGET_ID = #{targetId} AND MENU_CD = #{menuCd}
+        ORDER BY HIS_DT DESC
+    </select>
+
+    <delete id="deleteByTargetIdAndMenuCd">
+        DELETE FROM TC_COMMON_HISTORY
+        WHERE TARGET_ID = #{targetId} AND MENU_CD = #{menuCd}
+    </delete>
+
+    <delete id="deleteByMenuCdAndTargetIdIn">
+        DELETE FROM TC_COMMON_HISTORY
+        WHERE MENU_CD = #{menuCd}
+          AND TARGET_ID IN
+        <foreach item="item" collection="targetIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

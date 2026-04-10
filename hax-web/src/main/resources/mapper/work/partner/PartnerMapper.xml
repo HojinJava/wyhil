@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.software.partner.dao.PartnerDao">
+
+    <resultMap id="PartnerResultMap" type="com.hnix.sd.work.software.partner.dto.PartnerDto">
+        <id property="subCode" column="SUB_CD"/>
+        <result property="swCode" column="SW_CD"/>
+        <result property="compCode" column="COMP_CD"/>
+        <result property="partnerTypeCd" column="PARTNER_TYPE_CD"/>
+        <result property="partnerContractCd" column="PARTNER_CONTRACT_CD"/>
+        <result property="contractCancelPossibleYn" column="CONTRACT_CANCEL_POSSIBLE_YN"/>
+        <result property="upgradePossibleYn" column="UPGRADE_POSSIBLE_YN"/>
+        <result property="technicalSupportYn" column="TECHNICAL_SUPPORT_YN"/>
+        <result property="visitSupportYn" column="VISIT_SUPPORT_YN"/>
+        <result property="regularServiceCd" column="REGULAR_SERVICE_CD"/>
+        <result property="subscriptionYn" column="SUBSCRIPTION_YN"/>
+        <result property="remark" column="REMARK"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="modDt" column="MOD_DT"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="PartnerResultMap">
+        SELECT * FROM TS_WORK_SW_PARTNER
+    </select>
+
+    <select id="findBySubCode" resultMap="PartnerResultMap">
+        SELECT * FROM TS_WORK_SW_PARTNER WHERE SUB_CD = #{subCode}
+    </select>
+
+    <select id="existsBySubCode" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TS_WORK_SW_PARTNER WHERE SUB_CD = #{subCode}
+    </select>
+
+    <select id="findByDeptNmAndSubCodeAndSwName" resultType="map">
+        SELECT
+            p.SUB_CD,
+            p.COMP_CD, d.DEPT_NM,
+            p.SW_CD, s.SW_NM,
+            p.PARTNER_TYPE_CD,
+            (SELECT CODE_TEXT FROM TC_CODE WHERE CODE_CD = p.PARTNER_TYPE_CD) AS codeText,
+            p.PARTNER_CONTRACT_CD,
+            (SELECT CODE_TEXT FROM TC_CODE WHERE CODE_CD = p.PARTNER_CONTRACT_CD) AS partnerContractCdText,
+            p.CONTRACT_CANCEL_POSSIBLE_YN,
+            p.UPGRADE_POSSIBLE_YN,
+            p.TECHNICAL_SUPPORT_YN,
+            p.VISIT_SUPPORT_YN,
+            p.REGULAR_SERVICE_CD,
+            (SELECT CODE_TEXT FROM TC_CODE WHERE CODE_CD = p.REGULAR_SERVICE_CD) AS regularServiceCdText,
+            p.SUBSCRIPTION_YN,
+            p.REMARK
+        FROM TS_WORK_SW_PARTNER p
+        INNER JOIN TC_DEPT d ON p.COMP_CD = d.DEPT_CD
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        WHERE d.DEPT_NM LIKE CONCAT('%', #{deptNm}, '%')
+          AND p.SUB_CD LIKE CONCAT('%', #{subCode}, '%')
+          AND s.SW_NM LIKE CONCAT('%', #{swName}, '%')
+    </select>
+
+    <select id="findExistingPartnerBySoftwareCode" resultMap="PartnerResultMap">
+        SELECT * FROM TS_WORK_SW_PARTNER WHERE SW_CD = #{swCode}
+    </select>
+
+    <select id="countBySubCodeFromSwCode" resultType="java.lang.Integer">
+        SELECT COUNT(SUB_CD) FROM TS_WORK_SW_PARTNER WHERE SUB_CD LIKE CONCAT(#{swCode}, '%')
+    </select>
+
+    <insert id="insertPartner">
+        INSERT INTO TS_WORK_SW_PARTNER (
+            SUB_CD, SW_CD, COMP_CD, PARTNER_TYPE_CD, PARTNER_CONTRACT_CD,
+            CONTRACT_CANCEL_POSSIBLE_YN, UPGRADE_POSSIBLE_YN, TECHNICAL_SUPPORT_YN,
+            VISIT_SUPPORT_YN, REGULAR_SERVICE_CD, SUBSCRIPTION_YN, REMARK, REG_ID, REG_DT
+        ) VALUES (
+            #{subCode}, #{swCode}, #{compCode}, #{partnerTypeCd}, #{partnerContractCd},
+            #{contractCancelPossibleYn}, #{upgradePossibleYn}, #{technicalSupportYn},
+            #{visitSupportYn}, #{regularServiceCd}, #{subscriptionYn}, #{remark}, #{regId}, NOW()
+        )
+    </insert>
+
+    <update id="updatePartner">
+        UPDATE TS_WORK_SW_PARTNER SET
+            SW_CD = #{swCode},
+            COMP_CD = #{compCode},
+            PARTNER_TYPE_CD = #{partnerTypeCd},
+            PARTNER_CONTRACT_CD = #{partnerContractCd},
+            CONTRACT_CANCEL_POSSIBLE_YN = #{contractCancelPossibleYn},
+            UPGRADE_POSSIBLE_YN = #{upgradePossibleYn},
+            TECHNICAL_SUPPORT_YN = #{technicalSupportYn},
+            VISIT_SUPPORT_YN = #{visitSupportYn},
+            REGULAR_SERVICE_CD = #{regularServiceCd},
+            SUBSCRIPTION_YN = #{subscriptionYn},
+            REMARK = #{remark},
+            MOD_ID = #{modId},
+            MOD_DT = NOW()
+        WHERE SUB_CD = #{subCode}
+    </update>
+
+    <delete id="deletePartner">
+        DELETE FROM TS_WORK_SW_PARTNER WHERE SUB_CD = #{subCode}
+    </delete>
+
+</mapper>

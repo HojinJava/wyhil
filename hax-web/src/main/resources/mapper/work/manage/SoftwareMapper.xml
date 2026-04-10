@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.software.manage.dao.SoftwareDao">
+
+    <resultMap id="SoftwareResultMap" type="com.hnix.sd.work.software.manage.dto.SoftwareDto">
+        <id property="swCode" column="SW_CD"/>
+        <result property="swName" column="SW_NM"/>
+        <result property="swDesc" column="SW_DESC"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modDt" column="MOD_DT"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="SoftwareResultMap">
+        SELECT * FROM TS_WORK_SW
+    </select>
+
+    <select id="findBySwCodeAndSwName" resultMap="SoftwareResultMap">
+        SELECT * FROM TS_WORK_SW
+        WHERE SW_CD LIKE CONCAT('%', #{swCode}, '%')
+          AND SW_NM LIKE CONCAT('%', #{swName}, '%')
+    </select>
+
+    <select id="findBySwCode" resultMap="SoftwareResultMap">
+        SELECT * FROM TS_WORK_SW WHERE SW_CD = #{swCode}
+    </select>
+
+    <select id="existsBySwCode" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TS_WORK_SW WHERE SW_CD = #{swCode}
+    </select>
+
+    <insert id="insertSoftware">
+        INSERT INTO TS_WORK_SW (SW_CD, SW_NM, SW_DESC, REG_ID, REG_DT)
+        VALUES (#{swCode}, #{swName}, #{swDesc}, #{regId}, NOW())
+    </insert>
+
+    <update id="updateSoftware">
+        UPDATE TS_WORK_SW SET
+            SW_NM = #{swName},
+            SW_DESC = #{swDesc},
+            MOD_ID = #{modId},
+            MOD_DT = NOW()
+        WHERE SW_CD = #{swCode}
+    </update>
+
+    <delete id="deleteBySwCode">
+        DELETE FROM TS_WORK_SW WHERE SW_CD = #{swCode}
+    </delete>
+
+</mapper>

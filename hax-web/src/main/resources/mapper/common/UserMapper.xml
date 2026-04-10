@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.user.dao.UserDao">
+
+    <!-- Result Map for User Entity -->
+    <resultMap id="UserResultMap" type="com.hnix.sd.common.user.dto.UserDto">
+        <id property="userId" column="USER_ID"/>
+        <result property="deptCd" column="DEPT_CD"/>
+        <result property="userNm" column="USER_NM"/>
+        <result property="userDeptNm" column="USER_DEPT_NM"/>
+        <result property="userPw" column="USER_PW"/>
+        <result property="userPositionNm" column="USER_POSITION_NM"/>
+        <result property="userEmail" column="USER_EMAIL"/>
+        <result property="userPhoneOffice" column="USER_PHONE_OFFICE"/>
+        <result property="userPhoneMobile" column="USER_PHONE_MOBILE"/>
+        <result property="deleteYn" column="DELETE_YN"/>
+        <result property="userCheckCd" column="USER_CHECK_CD"/>
+        <result property="remark" column="REMARK"/>
+        <result property="userCertYn" column="USER_CERT_YN"/>
+        <result property="userConsentYn" column="USER_CONSENT_YN"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="userPwResetYn" column="USER_PW_RESET_YN"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modDt" column="MOD_DT"/>
+        <result property="userConsentDt" column="USER_CONSENT_DT"/>
+        <result property="userCertDt" column="USER_CERT_DT"/>
+    </resultMap>
+
+    <!-- JPA Migration: findAllDeptAndUser -->
+    <select id="findAllDeptAndUser" resultType="map">
+        SELECT 
+            u.*, 
+            d.DEPT_NM as dept_nm,
+            func_find_company(d.DEPT_CD) as company_nm
+        FROM TC_USER u
+        LEFT JOIN TC_DEPT d ON u.DEPT_CD = d.DEPT_CD
+    </select>
+
+    <!-- JPA Migration: findByUserWithDept -->
+    <select id="findByUserWithDeptEntity" resultType="map">
+        SELECT 
+            u.*, 
+            d.COMPANY_NM,
+            d.DEPARTMENT_NM
+        FROM TC_USER u
+        LEFT JOIN V_ORGANIZATION_STRUCTURE d ON u.DEPT_CD = d.ORIGIN_CD
+        WHERE u.USER_ID = #{userId}
+    </select>
+
+    <select id="findByUserEmailEntity" resultMap="UserResultMap">
+        SELECT * FROM TC_USER WHERE USER_EMAIL = #{userEmail}
+    </select>
+
+    <select id="findByUserIdEntity" resultMap="UserResultMap">
+        SELECT * FROM TC_USER WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="existsByUserEmail" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TC_USER WHERE USER_EMAIL = #{userEmail}
+    </select>
+
+    <select id="existsByUserEmailAndDeleteYn" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TC_USER WHERE USER_EMAIL = #{userEmail} AND DELETE_YN = #{deleteYn}
+    </select>
+
+    <select id="findByUserCheckCdAndDeleteYnEntity" resultMap="UserResultMap">
+        SELECT * FROM TC_USER WHERE USER_CHECK_CD = #{userCheckCd} AND DELETE_YN = #{deleteYn}
+    </select>
+
+    <select id="findByUserIdStartingWith" resultType="string">
+        SELECT USER_ID FROM TC_USER WHERE USER_ID LIKE CONCAT(#{userIdPrefix}, '%')
+    </select>
+
+    <delete id="deleteMgrCompByUserId">
+        DELETE FROM tc_user_mgr_comp WHERE user_id = #{userId}
+    </delete>
+
+    <insert id="saveMgrComp">
+        INSERT INTO tc_user_mgr_comp (user_id, comp_cd, reg_id, reg_dt)
+        VALUES (#{userId}, #{compCd}, #{regId}, #{regDt})
+    </insert>
+
+    <select id="findMgrCompCodesByUserId" resultType="string">
+        SELECT comp_cd FROM tc_user_mgr_comp WHERE user_id = #{userId}
+    </select>
+
+    <select id="findMgrCompNamesByUserId" resultType="string">
+        SELECT GROUP_CONCAT(d.dept_nm SEPARATOR ', ')
+          FROM tc_user_mgr_comp umc
+          LEFT JOIN tc_dept d ON umc.comp_cd = d.dept_cd
+         WHERE umc.user_id = #{userId}
+    </select>
+
+    <select id="findCompanyNameByDeptCd" resultType="string">
+        SELECT func_find_company(#{deptCd})
+    </select>
+
+    <select id="findDepartmentNameByDeptCd" resultType="string">
+        SELECT dept_nm FROM tc_dept WHERE dept_cd = #{deptCd}
+    </select>
+
+    <select id="existsByUserId" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TC_USER WHERE USER_ID = #{userId}
+    </select>
+
+    <!-- RAD Migration: getAuthGroupUser -->
+    <select id="getAuthGroupUser" resultType="map">
+        SELECT * FROM TC_AUTH_GROUP_USER WHERE USER_ID = #{userId}
+    </select>
+
+    <!-- RAD Migration: getRequesterByEmail -->
+    <select id="getRequesterByEmail" resultType="map">
+        SELECT count(*) AS user_count
+          FROM TC_USER a
+         WHERE a.USER_EMAIL = #{userEmail}
+    </select>
+
+    <!-- RAD Migration: getRequesterByDeptCd -->
+    <select id="getRequesterByDeptCd" resultType="com.hnix.sd.work.registration.record.dto.RequesterUserDto">
+        SELECT
+            a.user_id,
+            a.user_nm,
+            a.user_email,
+            a.user_position_nm,
+            a.user_phone_mobile,
+            a.user_phone_office,
+            a.dept_cd,
+            a.user_dept_nm,
+            b.company_nm,
+            b.company_cd,
+            b.department_nm,
+            b.department_cd,
+            b.comp_type_cd
+        FROM TC_USER a
+        LEFT JOIN v_organization_structure b ON a.dept_cd = b.origin_cd
+        LEFT JOIN tc_auth_group_user c ON a.user_id = c.user_id
+        WHERE a.DELETE_YN = 'N'
+          AND a.USER_EMAIL IS NOT NULL AND a.USER_EMAIL != ''
+        <if test="isRequester == 'Y'">
+            AND a.dept_cd = #{deptCode}
+        </if>
+        <if test="isRequester != 'Y'">
+            AND a.dept_cd != #{deptCode}
+        </if>
+        AND c.group_cd IN (#{userGroup}, #{deptManageGroup})
+        GROUP BY a.user_id, a.user_email
+        ORDER BY b.department_nm DESC, a.user_nm DESC
+    </select>
+
+    <!-- RAD Migration: updateUserExpireConsentByUserId -->
+    <update id="updateUserExpireConsentByUserId">
+        UPDATE TC_USER
+           SET USER_EMAIL = NULL,
+               USER_PHONE_MOBILE = NULL,
+               USER_PHONE_OFFICE = NULL,
+               USER_CONSENT_YN = 'N',
+               USER_CONSENT_DT = NULL,
+               MOD_ID = 'SYSTEM',
+               MOD_DT = NOW()
+         WHERE USER_ID = #{userId}
+    </update>
+
+    <!-- RAD Migration: insertCommonHistoryForConsent -->
+    <insert id="insertCommonHistoryForConsent">
+        INSERT INTO TC_COMMON_HISTORY (
+            TARGET_ID, MENU_CD, HIS_DT, HIS_TYPE_CD, HIS_CONTENTS, USER_ID, FILE_ID
+        ) VALUES (
+            #{userId}, #{menuCd}, NOW(), #{hisTypeCd}, #{hisContents}, 'SYSTEM', NULL
+        )
+    </insert>
+
+    <!-- Standard CRUD -->
+    <insert id="insertUser">
+        INSERT INTO TC_USER (
+            USER_ID, DEPT_CD, USER_NM, USER_DEPT_NM, USER_PW, USER_POSITION_NM,
+            USER_EMAIL, USER_PHONE_OFFICE, USER_PHONE_MOBILE, DELETE_YN,
+            USER_CHECK_CD, REMARK, USER_CERT_YN, USER_CONSENT_YN, REG_ID, REG_DT
+        ) VALUES (
+            #{userId}, #{deptCd}, #{userNm}, #{userDeptNm}, #{userPw}, #{userPositionNm},
+            #{userEmail}, #{userPhoneOffice}, #{userPhoneMobile}, #{deleteYn},
+            #{userCheckCd}, #{remark}, #{userCertYn}, #{userConsentYn}, #{regId}, NOW()
+        )
+    </insert>
+
+    <update id="updateUser">
+        UPDATE TC_USER
+           SET DEPT_CD = #{deptCd},
+               USER_NM = #{userNm},
+               USER_DEPT_NM = #{userDeptNm},
+               USER_PW = #{userPw},
+               USER_POSITION_NM = #{userPositionNm},
+               USER_EMAIL = #{userEmail},
+               USER_PHONE_OFFICE = #{userPhoneOffice},
+               USER_PHONE_MOBILE = #{userPhoneMobile},
+               DELETE_YN = #{deleteYn},
+               USER_CHECK_CD = #{userCheckCd},
+               REMARK = #{remark},
+               USER_CERT_YN = #{userCertYn},
+               USER_CONSENT_YN = #{userConsentYn},
+               MOD_ID = #{modId},
+               MOD_DT = NOW(),
+               USER_CONSENT_DT = #{userConsentDt},
+               USER_CERT_DT = #{userCertDt},
+               USER_PW_RESET_YN = #{userPwResetYn}
+         WHERE USER_ID = #{userId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM TC_USER WHERE USER_ID = #{userId}
+    </delete>
+
+    <sql id="userGridBase">
+        SELECT
+            u.USER_ID as userId,
+            d.COMPANY_NM as companyNm,
+            d.DEPARTMENT_NM as departmentNm,
+            d.MANAGE_NM as manageNm,
+            u.USER_DEPT_NM as userDeptNm,
+            u.DEPT_CD as deptCd,
+            u.USER_NM as userNm,
+            u.USER_EMAIL as userEmail,
+            u.USER_POSITION_NM as userPositionNm,
+            u.USER_PHONE_OFFICE as userPhoneOffice,
+            u.USER_PHONE_MOBILE as userPhoneMobile,
+            u.REMARK as remark,
+            COALESCE(u.USER_CERT_YN, 'N') as userCertYn,
+            COALESCE(u.USER_CONSENT_YN, 'N') as userConsentYn,
+            u.REG_DT as regDt,
+            COALESCE(u.DELETE_YN, 'N') as deleteYn,
+            MAX(log.ACCESS_DT) as lastAccessDt,
+            GROUP_CONCAT(DISTINCT g.GROUP_NM SEPARATOR ', ') as authGroup
+        FROM TC_USER u
+        LEFT JOIN V_ORGANIZATION_STRUCTURE d ON u.DEPT_CD = d.ORIGIN_CD
+        LEFT JOIN TC_USER_ACCESS_LOG log ON u.USER_ID = log.USER_ID
+        LEFT JOIN TC_AUTH_GROUP_USER au ON u.USER_ID = au.USER_ID
+        LEFT JOIN TC_AUTH_GROUP g ON au.GROUP_CD = g.GROUP_CD
+        WHERE u.USER_ID NOT IN ('admin', 'system')
+    </sql>
+
+    <sql id="userGridSearch">
+        <if test="deptCd != null and deptCd != ''">
+            AND u.DEPT_CD LIKE CONCAT('%', #{deptCd}, '%')
+        </if>
+        <if test="userNm != null and userNm != ''">
+            AND u.USER_NM LIKE CONCAT('%', #{userNm}, '%')
+        </if>
+        <if test="userEmail != null and userEmail != ''">
+            AND u.USER_EMAIL LIKE CONCAT('%', #{userEmail}, '%')
+        </if>
+    </sql>
+
+    <select id="findUserGridPagination" resultType="com.hnix.sd.common.user.dto.UserGridDto">
+        <include refid="userGridBase"/>
+        <include refid="userGridSearch"/>
+        GROUP BY
+            u.USER_ID, u.USER_NM, u.USER_EMAIL, u.DELETE_YN,
+            u.USER_DEPT_NM, u.DEPT_CD, u.USER_POSITION_NM, u.USER_PHONE_OFFICE,
+            u.USER_PHONE_MOBILE, u.REMARK, u.USER_CERT_YN, u.USER_CONSENT_YN,
+            u.REG_DT, d.COMPANY_NM, d.DEPARTMENT_NM, d.MANAGE_NM
+        <choose>
+            <when test="criteria != null and criteria != ''">
+                ORDER BY ${criteria} ${sort}
+            </when>
+            <otherwise>
+                ORDER BY u.REG_DT DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countUserGridPagination" resultType="long">
+        SELECT COUNT(DISTINCT u.USER_ID)
+        FROM TC_USER u
+        LEFT JOIN V_ORGANIZATION_STRUCTURE d ON u.DEPT_CD = d.ORIGIN_CD
+        WHERE u.USER_ID NOT IN ('admin', 'system')
+        <include refid="userGridSearch"/>
+    </select>
+
+    <select id="findAllUserGrid" resultType="com.hnix.sd.common.user.dto.UserGridDto">
+        <include refid="userGridBase"/>
+        <include refid="userGridSearch"/>
+        GROUP BY 
+            u.USER_ID, u.USER_NM, u.USER_EMAIL, u.DELETE_YN,
+            u.USER_DEPT_NM, u.DEPT_CD, u.USER_POSITION_NM, u.USER_PHONE_OFFICE,
+            u.USER_PHONE_MOBILE, u.REMARK, u.USER_CERT_YN, u.USER_CONSENT_YN,
+            u.REG_DT, d.COMPANY_NM, d.DEPARTMENT_NM, d.MANAGE_NM
+        ORDER BY u.REG_DT DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.code.dao.CodeDao">
+
+    <resultMap id="CodeResultMap" type="com.hnix.sd.common.code.dto.CodeDto">
+        <id property="groupCd" column="CODE_GROUP_CD"/>
+        <id property="codeCd" column="CODE_CD"/>
+        <result property="codeSeq" column="CODE_SEQ"/>
+        <result property="useYn" column="USE_YN"/>
+        <result property="codeText" column="CODE_TEXT"/>
+        <result property="codeText2" column="CODE_TEXT2"/>
+        <result property="codeText3" column="CODE_TEXT3"/>
+        <result property="codeText4" column="CODE_TEXT4"/>
+        <result property="codeText5" column="CODE_TEXT5"/>
+        <result property="codeVal" column="CODE_VAL"/>
+        <result property="codeVal2" column="CODE_VAL2"/>
+        <result property="codeVal3" column="CODE_VAL3"/>
+        <result property="codeVal4" column="CODE_VAL4"/>
+        <result property="codeVal5" column="CODE_VAL5"/>
+        <result property="codeDesc" column="CODE_DESC"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="modDt" column="MOD_DT"/>
+    </resultMap>
+
+    <resultMap id="GroupCodeAllResultMap" type="com.hnix.sd.common.code.dto.GroupCodeAllDto">
+        <result property="codeGroupCd" column="CODE_GROUP_CD"/>
+        <result property="codeCd" column="CODE_CD"/>
+        <result property="codeSeq" column="CODE_SEQ"/>
+        <result property="useYn" column="USE_YN"/>
+        <result property="codeText" column="CODE_TEXT"/>
+        <result property="codeDesc" column="CODE_DESC"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="modDt" column="MOD_DT"/>
+    </resultMap>
+
+    <resultMap id="GroupCodeResultMap" type="com.hnix.sd.common.code.dto.GroupCodeDto">
+        <result property="codeGroupCd" column="CODE_GROUP_CD"/>
+        <result property="codeCd" column="CODE_CD"/>
+        <result property="codeDesc" column="CODE_DESC"/>
+        <result property="useYn" column="USE_YN"/>
+    </resultMap>
+
+    <resultMap id="SubCodeResultMap" type="com.hnix.sd.common.code.dto.SubCodeDto">
+        <result property="codeGroupCd" column="CODE_GROUP_CD"/>
+        <result property="codeCd" column="CODE_CD"/>
+        <result property="codeSeq" column="CODE_SEQ"/>
+        <result property="useYn" column="USE_YN"/>
+        <result property="codeText" column="CODE_TEXT"/>
+        <result property="codeText2" column="CODE_TEXT2"/>
+        <result property="codeText3" column="CODE_TEXT3"/>
+        <result property="codeText4" column="CODE_TEXT4"/>
+        <result property="codeText5" column="CODE_TEXT5"/>
+        <result property="codeVal" column="CODE_VAL"/>
+        <result property="codeVal2" column="CODE_VAL2"/>
+        <result property="codeVal3" column="CODE_VAL3"/>
+        <result property="codeVal4" column="CODE_VAL4"/>
+        <result property="codeVal5" column="CODE_VAL5"/>
+        <result property="codeDesc" column="CODE_DESC"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="GroupCodeAllResultMap">
+        SELECT * FROM TC_COMMON_CODE
+        ORDER BY CODE_GROUP_CD, CODE_SEQ
+    </select>
+
+    <select id="findByCodeGroupCd" resultMap="SubCodeResultMap">
+        SELECT *
+          FROM TC_COMMON_CODE
+         WHERE CODE_GROUP_CD = #{groupCodeId}
+           AND CODE_SEQ != 0
+         ORDER BY CODE_SEQ
+    </select>
+
+    <select id="findBySubCodeCd" resultMap="GroupCodeResultMap">
+        SELECT *
+          FROM TC_COMMON_CODE
+         WHERE CODE_CD = #{codeCd}
+    </select>
+
+    <select id="findByMultiCodeGroupCd" resultMap="SubCodeResultMap">
+        SELECT *
+          FROM TC_COMMON_CODE
+         WHERE CODE_GROUP_CD IN
+        <foreach item="item" collection="codeCdIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+           AND CODE_CD != '*'
+         ORDER BY CODE_GROUP_CD, CODE_SEQ
+    </select>
+
+    <select id="findByCodeId" resultMap="CodeResultMap">
+        SELECT *
+          FROM TC_COMMON_CODE
+         WHERE CODE_GROUP_CD = #{codeGroupCd}
+           AND CODE_CD = #{codeCd}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO TC_COMMON_CODE (
+            CODE_GROUP_CD, CODE_CD, CODE_SEQ, USE_YN,
+            CODE_TEXT, CODE_TEXT2, CODE_TEXT3, CODE_TEXT4, CODE_TEXT5,
+            CODE_VAL, CODE_VAL2, CODE_VAL3, CODE_VAL4, CODE_VAL5,
+            CODE_DESC, REG_ID, REG_DT
+        ) VALUES (
+            #{groupCd}, #{codeCd}, #{codeSeq}, #{useYn},
+            #{codeText}, #{codeText2}, #{codeText3}, #{codeText4}, #{codeText5},
+            #{codeVal}, #{codeVal2}, #{codeVal3}, #{codeVal4}, #{codeVal5},
+            #{codeDesc}, #{regId}, NOW()
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE TC_COMMON_CODE
+           SET CODE_SEQ = #{codeSeq},
+               USE_YN = #{useYn},
+               CODE_TEXT = #{codeText},
+               CODE_TEXT2 = #{codeText2},
+               CODE_TEXT3 = #{codeText3},
+               CODE_TEXT4 = #{codeText4},
+               CODE_TEXT5 = #{codeText5},
+               CODE_VAL = #{codeVal},
+               CODE_VAL2 = #{codeVal2},
+               CODE_VAL3 = #{codeVal3},
+               CODE_VAL4 = #{codeVal4},
+               CODE_VAL5 = #{codeVal5},
+               CODE_DESC = #{codeDesc},
+               MOD_ID = #{modId},
+               MOD_DT = NOW()
+         WHERE CODE_GROUP_CD = #{groupCd}
+           AND CODE_CD = #{codeCd}
+    </update>
+
+    <delete id="deleteByGroupCode">
+        DELETE FROM TC_COMMON_CODE WHERE CODE_GROUP_CD = #{codeGroupCd}
+    </delete>
+
+    <delete id="deleteBySubCode">
+        DELETE FROM TC_COMMON_CODE
+         WHERE CODE_GROUP_CD = #{codeGroupCd}
+           AND CODE_CD IN
+        <foreach item="item" collection="subCodeCds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

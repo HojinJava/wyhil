@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.user.mapper.UserMapper">
+
+    <resultMap id="userResultMap" type="com.hnix.sd.common.user.dto.UserDto">
+        <id column="USER_ID" property="userId"/>
+        <result column="DEPT_CD" property="deptCd"/>
+        <result column="USER_NM" property="userNm"/>
+        <result column="USER_DEPT_NM" property="userDeptNm"/>
+        <result column="USER_PW" property="userPw"/>
+        <result column="USER_POSITION_NM" property="userPositionNm"/>
+        <result column="USER_EMAIL" property="userEmail"/>
+        <result column="USER_PHONE_OFFICE" property="userPhoneOffice"/>
+        <result column="USER_PHONE_MOBILE" property="userPhoneMobile"/>
+        <result column="USER_CHECK_CD" property="userCheckCd"/>
+        <result column="DELETE_YN" property="deleteYn"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="MOD_ID" property="modId"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="MOD_DT" property="modDt"/>
+    </resultMap>
+
+    <select id="findById" resultMap="userResultMap">
+        SELECT * FROM TC_USER WHERE USER_ID = #{id}
+    </select>
+
+    <select id="findByUserId" resultMap="userResultMap">
+        SELECT * FROM TC_USER WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="findByUserEmail" resultMap="userResultMap">
+        SELECT * FROM TC_USER WHERE USER_EMAIL = #{userEmail}
+    </select>
+
+    <select id="existsByUserEmailAndDeleteYn" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TC_USER WHERE USER_EMAIL = #{userEmail} AND DELETE_YN = #{deleteYn}
+    </select>
+
+    <select id="existsByUserEmail" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TC_USER WHERE USER_EMAIL = #{userEmail}
+    </select>
+
+    <select id="findByUserCheckCdAndDeleteYn" resultMap="userResultMap">
+        SELECT * FROM TC_USER WHERE USER_CHECK_CD = #{userCheckCd} AND DELETE_YN = #{deleteYn}
+    </select>
+
+    <select id="findByUserIdStartingWith" resultType="java.lang.String">
+        SELECT USER_ID FROM TC_USER WHERE USER_ID LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <select id="findAll" resultMap="userResultMap">
+        SELECT * FROM TC_USER
+    </select>
+
+    <insert id="insert" parameterType="com.hnix.sd.common.user.dto.UserDto">
+        INSERT INTO TC_USER (
+            USER_ID, DEPT_CD, USER_NM, USER_DEPT_NM, USER_PW, USER_POSITION_NM, USER_EMAIL,
+            USER_PHONE_OFFICE, USER_PHONE_MOBILE, USER_CHECK_CD, DELETE_YN, REG_ID, MOD_ID, REG_DT, MOD_DT
+        ) VALUES (
+            #{userId}, #{deptCd}, #{userNm}, #{userDeptNm}, #{userPw}, #{userPositionNm}, #{userEmail},
+            #{userPhoneOffice}, #{userPhoneMobile}, #{userCheckCd}, #{deleteYn}, #{regId}, #{modId}, NOW(), NOW()
+        )
+    </insert>
+
+    <select id="existsByUserId" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM TC_USER WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="findCompanyNameByDeptCd" resultType="java.lang.String">
+        SELECT COMPANY_NM FROM TS_DEPT WHERE DEPT_CD = #{deptCd}
+    </select>
+
+    <select id="findDepartmentNameByDeptCd" resultType="java.lang.String">
+        SELECT DEPT_NM FROM TS_DEPT WHERE DEPT_CD = #{deptCd}
+    </select>
+
+    <select id="findMgrCompNamesByUserId" resultType="java.lang.String">
+        SELECT DISTINCT d.COMPANY_NM
+        FROM TC_USER u
+        INNER JOIN TS_DEPT d ON u.DEPT_CD = d.DEPT_CD
+        WHERE u.USER_ID = #{userId}
+    </select>
+
+</mapper>
