@@ -13,9 +13,23 @@
 
 ---
 
-## 1. 이슈 생성
+## 참여 모델
 
-**담당:** 👤 관리자
+> 각 모델은 각자 메인 브런치에서만 작업을 해야 됩니다.
+
+<!-- VIBE-MODELS-START -->
+| 모델 | 메인 브런치 | 등록된 사용자 |
+|------|-----------|-------------|
+| **Claude** | `claude` | @HojinJava |
+| **Wyhill** | `wyhill` | - |
+| **Wyhill+지침서** | `wyhill-guide` | @HojinJava |
+| **안티그래비티** | `antigravity` | @myoungsuboh, @SeJin4019, @HojinJava |
+| **Codex** | `codex` | @ChaeJ |
+<!-- VIBE-MODELS-END -->
+
+---
+
+## 1. 이슈 생성 [관리자]
 
 `/wyh:create-issue` 명령을 대화형으로 실행하여 이슈를 생성합니다.
 
@@ -23,141 +37,51 @@
 /wyh:create-issue
 ```
 
-| 입력 항목 | 설명 |
-|-----------|------|
-| 프로젝트 | 등록된 프로젝트 목록에서 선택 |
-| 기능 제목 | 영어로 입력 (예: `server-startup-log`) |
-| 레벨 | 1=L1(단순) / 2=L2(중간) / 3=L3(복잡) |
-| 공통 프롬프트 | 모든 모델이 수행할 작업 내용 |
-| 참여 모델 | 평가에 참여할 모델 선택 |
+이슈가 생성되면 각 참여 모델 브런치에 task 파일이 자동 생성됩니다.
 
-확인 후 아래가 자동 실행됩니다:
-
-- `.claude/feature-definitions/{slug}.md` 저장
-- GitHub Issue 생성
-- 각 참여 모델 브랜치에 `task/{project}/issue-{N}.md` 자동 push
-
-→ [작업 지시 템플릿](.claude/skills/vibe-eval/templates/issue-task.md)
+> `task/{프로젝트명}/issue-{issueNum}.md`
 
 ---
 
-## 2. 바이브코딩 요청
+## 2. 바이브 코딩 & 리뷰 진행 [사용자]
 
-**담당:** 🙋 사용자
-
-각 AI 모델에게 본인 브랜치를 pull하고 task 파일을 읽으라고 안내합니다.
+각 AI 모델에게 task 폴더 안의 md 파일을 순서대로 처리하도록 요청합니다.
 
 ```
-{model} 브랜치 pull 받고 task/{project}/issue-{N}.md 읽고 작업해줘
+task폴더안에 있는 md파일 모두 하나씩 진행해줘
 ```
 
-| 규칙 | 내용 |
-|------|------|
-| 추가 프롬프트 | ❌ 금지 |
-| 지침서 적용 | ✅ 허용 (PR 본문에 기록) |
+> `issue-{N}.md` 가 있을 경우 → 바이브코딩 진행  
+> `review-{N}.md` 가 있을 경우 → 리뷰 진행
+
+각 AI 모델은 등록된 md파일에 의해 아래 작업을 순서대로 진행합니다:
+
+1. 본인 메인 브런치로 이동
+2. 해당 브런치에서 새로운 작업 브런치 생성
+3. 새 브런치에서 작업 진행
+4. 작업 후 본인 브런치에 PR 요청
+5. 작업이 끝난 md파일을 `task_done/`으로 이동
+   > `task/`에 남아 있으면 계속 중복 실행되기 때문에 이동 필수
+6. 본인 메인 브런치에 push
 
 ---
 
-## 3. 바이브코딩 진행
+## 3. 리뷰.md 자동 생성 [GitHub Actions]
 
-**담당:** 🤖 AI 모델
+PR 생성 요청이 오면 자동으로 유효성 검사를 진행합니다. **검증 실패 시 자동 Close.**
 
-task 파일의 지시에 따라 개발을 진행하고 PR을 생성합니다.
+> **검증:** PR 타겟 브런치가 본인 메인 브런치인지 확인  
+> 예) `claude` 모델은 `claude` 브런치에만 PR 요청 가능
 
-```bash
-git fetch origin {model}
-git checkout -b vibe/{model}/{slug}-{N} origin/{model}
-```
+검증을 통과하면 다른 모델 브런치에 리뷰 파일이 자동 생성됩니다.
 
-| 작업 항목 | 내용 |
-|-----------|------|
-| 작업 위치 | `task/{project}/issue-{N}.md` 참고 |
-| 브랜치 | `vibe/{model}/{slug}-{issue-number}` |
-| PR 대상 | 본인 모델 베이스 브랜치 (`{model}`) |
-| PR 제목 | `[{모델명}] {기능명} #{issue-number}` |
-| PR → Issue 연결 | `References #{N}` 사용 (`Closes` 아님) |
-| 커밋 | squash하여 1개로 제출 |
-
-PR 생성 후 task 파일을 `task_done/`으로 이동합니다 (작업 브랜치 + 모델 베이스 브랜치 모두):
-
-```bash
-# 1. 작업 브랜치에서
-mkdir -p task_done/{project}
-git mv task/{project}/issue-{N}.md task_done/{project}/issue-{N}.md
-git commit -m "chore: move issue-{N} task to task_done"
-git push origin vibe/{model}/{slug}-{N}
-
-# 2. 모델 베이스 브랜치에서
-git checkout {model} && git pull origin {model}
-mkdir -p task_done/{project}
-git mv task/{project}/issue-{N}.md task_done/{project}/issue-{N}.md
-git commit -m "chore: move issue-{N} task to task_done"
-git push origin {model}
-```
+> `task/{프로젝트명}/review-{PR Number}.md`
 
 ---
 
-## 4. 리뷰 요청
+## 4. 사용자 확인 [사용자]
 
-**담당:** 🙋 사용자
-
-PR이 생성되면 다른 모델 브랜치에 `task/{project}/review-{N}.md`가 자동 push됩니다.  
-해당 모델에게 브랜치를 pull하고 리뷰 파일을 읽으라고 안내합니다.
-
-```
-{model} 브랜치 pull 받고 task/{project}/review-{N}.md 읽고 리뷰해줘
-```
-
----
-
-## 5. 리뷰 진행
-
-**담당:** 🤖 AI 모델
-
-review 파일의 지시에 따라 PR을 검토하고 평가서를 PR 댓글로 등록합니다.
-
-→ [리뷰 지시 템플릿](.claude/skills/vibe-eval/templates/review-task.md)
-
-| 작업 항목 | 내용 |
-|-----------|------|
-| 작업 위치 | `task/{project}/review-{N}.md` 참고 |
-| 평가 기준 | 공통 프롬프트 이행 · 결과물 품질 · 자율 완성도 (각 1~5점) |
-| 리뷰 방식 | PR diff만 기준 — 로컬 실행 없음 |
-| 제출 방식 | PR 댓글로 평가서 등록 |
-
-리뷰 완료 후 task 파일을 `task_done/`으로 이동합니다:
-
-```bash
-mkdir -p task_done/{project}
-git mv task/{project}/review-{N}.md task_done/{project}/review-{N}.md
-git commit -m "chore: move review-{N} task to task_done"
-git push origin {model}
-```
-
----
-
-## 6. 리포트 생성
-
-**담당:** 👤 관리자
-
-모든 모델의 PR 및 리뷰가 완료되면 Issue를 수동으로 종료하고 리포트를 생성합니다.  
-Issue에 연결된 PR과 세션 기록을 분석하여 모델별 비교 리포트를 작성합니다.
-
-→ [리포트 생성 가이드](.claude/skills/vibe-eval/report.md)
-
-결과물: `reports/{slug}-{issue-number}/comparison.md`
-
----
-
-## 참여 모델
-
-| 모델 | 브랜치 슬러그 | 세션 파일명 |
-|------|-------------|------------|
-| **Claude** | `claude` | `claude.md` |
-| **Wyhill** | `wyhill` | `wyhill.md` |
-| **Wyhill+지침서** | `wyhill-guide` | `wyhill-guide.md` |
-| **Cortex Code** | `cortex-code` | `cortex-code.md` |
-| **Antigravity** | `antigravity` | `antigravity.md` |
+본인이 작업한 이슈가 PR에 잘 올라갔는지 확인합니다.
 
 ---
 
