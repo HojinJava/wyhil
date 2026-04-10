@@ -25,9 +25,6 @@
 | Codex | `codex` | - |
 <!-- VIBE-MODELS-END -->
 
-> 모델 추가/삭제: `/wyh:model add <key>` / `/wyh:model del <key>`  
-> 계정 연결: `/wyh:user-mapping`
-
 ---
 
 ## 1. 프롬프트 작성
