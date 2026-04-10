@@ -30,10 +30,16 @@ namespace BinaryPacketServer
             if (IsResult)
             {
                 DevLog.Write(string.Format("서버 네트워크 시작"), LOG_LEVEL.INFO);
+                Console.WriteLine("╔══════════════════════════════════════╗");
+                Console.WriteLine("║  🚀  서버가 실행됩니다               ║");
+                Console.WriteLine("║  📡  포트: 18732                      ║");
+                Console.WriteLine("║  ✅  상태: 정상 기동                  ║");
+                Console.WriteLine("╚══════════════════════════════════════╝");
             }
             else
             {
                 DevLog.Write(string.Format("[ERROR] 서버 네트워크 시작 실패"), LOG_LEVEL.ERROR);
+                Console.WriteLine("❌ 서버 기동에 실패했습니다.");
                 return;
             }
 
