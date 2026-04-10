@@ -32,3 +32,13 @@ gh pr view {PR_NUMBER} --repo {OWNER}/{REPO}
 토큰 수: (예: 입력 12,000 / 출력 3,500)
 프롬프트 횟수:
 지침서: (없으면 없음)
+
+## 리뷰 완료 후 파일 정리
+
+PR 댓글 등록이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
+
+```
+git mv {TARGET_DIR}/task/review-{ISSUE_NUMBER}.md {TARGET_DIR}/task_done/review-{ISSUE_NUMBER}.md
+git commit -m "chore: move review-{ISSUE_NUMBER} task to task_done"
+git push origin {MODEL}
+```
