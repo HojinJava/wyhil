@@ -3,6 +3,12 @@ name: Vibe Review Dispatch
 on:
   pull_request:
     types: [opened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR 번호 (수동 실행 시)'
+        required: true
+        type: number
 
 permissions:
   contents: write
@@ -21,11 +27,22 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const headBranch = context.payload.pull_request.head.ref;
-            const prNumber = context.payload.pull_request.number;
-            const prTitle = context.payload.pull_request.title;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+
+            // pull_request 이벤트 또는 workflow_dispatch 수동 실행 모두 지원
+            let headBranch, prNumber, prTitle;
+            if (context.eventName === 'workflow_dispatch') {
+              const prNum = parseInt(context.payload.inputs.pr_number, 10);
+              const prData = await github.rest.pulls.get({ owner, repo, pull_number: prNum });
+              headBranch = prData.data.head.ref;
+              prNumber = prData.data.number;
+              prTitle = prData.data.title;
+            } else {
+              headBranch = context.payload.pull_request.head.ref;
+              prNumber = context.payload.pull_request.number;
+              prTitle = context.payload.pull_request.title;
+            }
 
             // vibe/* 브랜치만 처리
             const branchMatch = headBranch.match(/^vibe\/([^\/]+)\/.+-(\d+)$/);
@@ -45,7 +62,7 @@ jobs:
               const configRes = await github.rest.repos.getContent({
                 owner, repo,
                 path: '.github/vibe-models.json',
-                ref: context.payload.pull_request.base.repo.default_branch
+                ref: 'main'
               });
               config = JSON.parse(Buffer.from(configRes.data.content, 'base64').toString());
               allModels = Object.keys(config.models);
@@ -60,7 +77,7 @@ jobs:
               const templateRes = await github.rest.repos.getContent({
                 owner, repo,
                 path: '.claude/skills/vibe-eval/templates/review-task.md',
-                ref: context.payload.pull_request.base.repo.default_branch
+                ref: 'main'
               });
               template = Buffer.from(templateRes.data.content, 'base64').toString();
             } catch (e) {
@@ -77,7 +94,7 @@ jobs:
               const projectsRes = await github.rest.repos.getContent({
                 owner, repo,
                 path: '.github/vibe-projects.json',
-                ref: context.payload.pull_request.base.repo.default_branch
+                ref: 'main'
               });
               projects = JSON.parse(Buffer.from(projectsRes.data.content, 'base64').toString()).projects;
             } catch(e) {
