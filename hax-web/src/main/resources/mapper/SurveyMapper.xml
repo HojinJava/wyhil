@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.registration.survey.SurveyDao">
+
+    <resultMap id="surveyResultMap" type="com.hnix.sd.work.registration.survey.dto.SurveyInfoDto">
+        <id column="SERVICE_NO" property="serviceNo"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="SURVEY_DT" property="surveyDt"/>
+        <result column="POINT_QUI" property="pointQui"/>
+        <result column="POINT_ACC" property="pointAcc"/>
+        <result column="POINT_FRI" property="pointFri"/>
+        <result column="POINT_SAT" property="pointSat"/>
+        <result column="POINT_SUM" property="pointSum"/>
+        <result column="REMARK" property="remark"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="MOD_ID" property="modId"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="MOD_DT" property="modDt"/>
+    </resultMap>
+
+    <select id="findById" resultMap="surveyResultMap">
+        SELECT * FROM TS_WORK_SURVEY WHERE SERVICE_NO = #{id}
+    </select>
+
+    <select id="findAll" resultMap="surveyResultMap">
+        SELECT * FROM TS_WORK_SURVEY
+    </select>
+
+    <insert id="save" parameterType="com.hnix.sd.work.registration.survey.dto.SurveyInfoDto">
+        INSERT INTO TS_WORK_SURVEY (
+            SERVICE_NO, USER_ID, SURVEY_DT, POINT_QUI, POINT_ACC, POINT_FRI, POINT_SAT, POINT_SUM,
+            REMARK, REG_ID, MOD_ID, REG_DT, MOD_DT
+        ) VALUES (
+            #{serviceNo}, #{userId}, #{surveyDt}, #{pointQui}, #{pointAcc}, #{pointFri}, #{pointSat}, #{pointSum},
+            #{remark}, #{regId}, #{modId}, NOW(), NOW()
+        )
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM TS_WORK_SURVEY WHERE SERVICE_NO = #{id}
+    </delete>
+
+</mapper>

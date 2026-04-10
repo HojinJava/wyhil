@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.common.excel.dao.ExcelDao">
+
+	<!-- 작업현황 목록 (엑셀용) -->
+	<select id="getWorkList" parameterType="map" resultType="map">
+		SELECT
+		a.service_no, -- 서비스번호
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.service_cd) service_nm, -- 서비스명
+		a.contract_no, -- 계약번호
+		a.sub_cd, -- subcode
+		to_char(a.req_dt, 'YYYY-MM-DD') req_dt, -- 요청일자
+		to_char(a.proc_dt, 'YYYY-MM-DD') proc_dt, -- 처리일자
+		to_char(a.reg_dt, 'YYYY-MM-DD') reg_dt, -- 등록일자
+		a.proc_support_cd, -- 처리매체 코드
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.proc_support_cd) proc_support_nm, -- 처리매체
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.proc_result_cd) proc_result_nm, -- 처리결과
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.status_cd) status_nm, -- 진행상태
+
+		a.req_contents, -- 요청내용
+		a.proc_contents, -- 처리내용
+
+		ifnull(sub.sw_nm, d.sw_nm) sw_nm, -- 소프트웨어 이름
+		(
+			SELECT GROUP_CONCAT(file_nm SEPARATOR ', ')
+				FROM tc_attach_file
+				WHERE file_id = a.service_no
+    	) AS file_names,
+		a.remark,
+
+		<!--고객사-->
+		ifnull(sub.mgr_dept_comp_nm, org04.company_nm) custom_company_nm, -- 고객사
+		ifnull(sub.mgr_dept_biz_nm, org04.department_nm) custom_dept_nm, -- 사업부
+		ifnull(sub.mgr_dept_nm, org04.manage_nm) custom_manage_nm, -- 관리부서
+
+		<!--요청자-->
+		a.req_user_id, -- 요청자 ID
+		ifnull(sub.req_user_nm, b.user_nm) req_user_nm, -- 요청자명
+		b.user_dept_nm req_user_dept_nm1, -- 요청자 부서
+		ifnull(sub.req_user_biz_nm, org01.department_nm) req_user_dept_nm2, -- 요청자 사업부
+		ifnull(sub.req_user_comp_nm, org01.company_nm) req_user_company_nm, -- 요청자 회사
+
+		a.req_comp_cd, -- 요청한 회사 코드
+		org02.company_nm req_comp_nm, -- 요청자 회사
+		org02.manage_nm req_manage_nm, -- 요청한 회사의 관리부서명
+
+		<!--협력사-->
+		a.proc_user_nm, -- 처리자명
+		ifnull(sub.proc_user_dept_nm, org03.company_nm) proc_company_nm, -- 처리자 회사명
+
+		(select point_sum from ts_work_survey where service_no = a.service_no) point_sum, -- 만족도점수
+
+		<!--승인정보-->
+		f.cert_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = f.cert_cd) cert_nm, -- 동의여부
+		f.cert_dt,
+		(case when f.cert_comment is not null and f.cert_comment != '' then '○' else '' end) cert_comment_tf
+
+		FROM ts_work_history a
+		LEFT JOIN ts_work_history_sub sub on sub.service_no = a.service_no
+		LEFT JOIN tc_user b ON b.user_id = a.req_user_id
+		LEFT JOIN v_organization_structure org01 ON org01.origin_cd = b.dept_cd
+		LEFT JOIN v_organization_structure org02 ON org02.origin_cd = a.req_comp_cd
+		LEFT JOIN ts_work_sw_contract e ON e.CONTRACT_NO = a.CONTRACT_NO
+		LEFT JOIN v_organization_structure org04 ON org04.origin_cd = e.dept_cd
+		LEFT JOIN ts_work_sw_partner c ON c.sub_cd = a.sub_cd
+		LEFT JOIN ts_work_sw d ON d.sw_cd = c.sw_cd
+		LEFT JOIN v_organization_structure org03 ON org03.origin_cd = a.proc_dept_cd
+		LEFT JOIN ts_work_cert f ON f.service_no = a.service_no
+
+		WHERE 1=1
+		and a.req_dt BETWEEN #{startDate} AND #{endDate}
+
+		<if test='resultYn == "N" and userAuth != null and userAuth == "SUPPORT"'>
+			and org03.company_cd = #{userCompCd}
+		</if>
+		<if test='resultYn == "Y" and userAuth != null and (userAuth == "USER" or userAuth == "SUPPORT")'>
+			and a.req_user_id = #{userId}
+		</if>
+		<if test='resultYn == "Y" and userAuth != null and userAuth == "DEPT_MANAGE"'>
+			and org04.company_cd = #{userCompCd}
+		</if>
+		<if test='resultYn == "Y" and userAuth != null and userAuth == "MANAGE"'>
+			and org04.company_cd in ( select comp_cd from tc_user_mgr_comp where user_id = #{userId} union all select #{userCompCd})
+		</if>
+
+		<if test="customerCode != null and customerCode != ''">
+			and org04.company_cd = #{customerCode}
+		</if>
+		<if test="departmentCode != null and departmentCode != ''">
+			and org04.origin_cd = #{departmentCode}
+		</if>
+		<if test="partnerCode != null and partnerCode != ''">
+			and org03.company_cd = #{partnerCode}
+		</if>
+		<if test="satisfied != null and satisfied != ''">
+			and a.service_no in (
+				select service_no
+				from ts_work_survey
+				where point_sum is not null
+				and 0 <![CDATA[<]]> point_sum
+				and point_sum <![CDATA[<]]> 100
+			)
+		</if>
+		<if test="softwareName != null and softwareName != ''">
+			and d.sw_nm like CONCAT('%', #{softwareName}, '%')
+		</if>
+		<if test="subCodeText != null and subCodeText != ''">
+			and a.sub_cd like CONCAT('%', #{subCodeText}, '%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like CONCAT('%', #{contractNo}, '%')
+		</if>
+		<if test="contractYear != null and contractYear != ''">
+			and e.delete_yn = 'N' and e.contract_year = #{contractYear}
+		</if>
+		ORDER BY a.reg_dt DESC
+	</select>
+
+	<!-- 협력사별 리포트 (엑셀용) -->
+	<select id="getReportPartner" parameterType="map" resultType="map">
+		select
+		data.*,
+		(case when sw_count > 1 then CONCAT(data.sw_nm, ' 외 ', data.sw_count - 1, '종') else data.sw_nm end) sw_nm_full
+		from (
+			select
+			(select company_nm from v_organization_structure where origin_cd = a.comp_cd) support_company_nm,
+			(select sw_nm from ts_work_sw where sw_cd = a.sw_cd) sw_nm,
+			(
+				select count(*)
+				from ts_work_sw_partner
+				where comp_cd = a.comp_cd
+				and sub_cd in (select DISTINCT sub_cd from ts_work_sw_contract where CONTRACT_NO like CONCAT('%', #{customerCode}, '%') and DELETE_YN = 'N' and CONTRACT_YEAR = #{contractYear})
+			) sw_count,
+
+			sum(case when b.service_no is not null then 1 else 0 end) sum_total,
+			sum(case when b.service_cd = 'SERVICE_ITEM_PATCH' then 1 else 0 end) sum_01,
+			sum(case when b.service_cd = 'SERVICE_ITEM_UPGRADE' then 1 else 0 end) sum_02,
+			sum(case when b.service_cd = 'SERVICE_ITEM_EDU' then 1 else 0 end) sum_03,
+			sum(case when b.service_cd = 'SERVICE_ITEM_CUSTOM' then 1 else 0 end) sum_04,
+			sum(case when b.service_cd = 'SERVICE_ITEM_TECH' then 1 else 0 end) sum_05,
+			sum(case when b.service_cd = 'SERVICE_ITEM_DAILY' then 1 else 0 end) sum_06,
+			sum(case when b.service_cd = 'SERVICE_ITEM_ERROR' then 1 else 0 end) sum_07,
+			sum(case when b.service_cd = 'SERVICE_ITEM_PERIODIC' then 1 else 0 end) sum_08,
+
+			sum(case when b.service_no is not null then 1 else 0 end) method_all,
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_EMAIL' then 1 else 0 end) method_01,
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_ETC' then 1 else 0 end) method_02,
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_PHONE' then 1 else 0 end) method_03,
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_POST' then 1 else 0 end) method_04,
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_REMOTE' then 1 else 0 end) method_05,
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_VISIT' then 1 else 0 end) method_06
+
+			from ts_work_sw_partner a
+			left join ts_work_history b on (
+			    a.sub_cd = b.sub_cd
+			    and b.req_dt between #{startDate} and #{endDate}
+			    and b.CONTRACT_NO like CONCAT('%', #{customerCode}, '%')
+			)
+			where 1=1
+			and a.sub_cd in (select DISTINCT sub_cd from ts_work_sw_contract where CONTRACT_NO like CONCAT('%', #{customerCode}, '%') and DELETE_YN = 'N' and CONTRACT_YEAR = #{contractYear})
+			group by a.comp_cd
+		) data
+		order by data.support_company_nm asc
+	</select>
+
+	<!-- 서브코드별 리포트 (엑셀용) -->
+	<select id="getReportSubcode" parameterType="map" resultType="map">
+		select
+		a.sub_cd,
+		a.partner_contract_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.partner_contract_cd) partner_contract_cd_text,
+		a.regular_service_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.regular_service_cd) regular_service_cd_text,
+		a.subscription_yn,
+		(select company_nm from v_organization_structure where origin_cd = a.comp_cd) support_company_nm,
+		(select sw_nm from ts_work_sw where sw_cd = a.sw_cd) sw_nm,
+
+		sum(case when b.service_no is not null then 1 else 0 end) sum_total,
+		sum(case when b.service_cd = 'SERVICE_ITEM_PATCH' then 1 else 0 end) sum_01,
+		sum(case when b.service_cd = 'SERVICE_ITEM_UPGRADE' then 1 else 0 end) sum_02,
+		sum(case when b.service_cd = 'SERVICE_ITEM_EDU' then 1 else 0 end) sum_03,
+		sum(case when b.service_cd = 'SERVICE_ITEM_CUSTOM' then 1 else 0 end) sum_04,
+		sum(case when b.service_cd = 'SERVICE_ITEM_TECH' then 1 else 0 end) sum_05,
+		sum(case when b.service_cd = 'SERVICE_ITEM_DAILY' then 1 else 0 end) sum_06,
+		sum(case when b.service_cd = 'SERVICE_ITEM_ERROR' then 1 else 0 end) sum_07,
+		sum(case when b.service_cd = 'SERVICE_ITEM_PERIODIC' then 1 else 0 end) sum_08,
+
+		sum(case when b.service_no is not null then 1 else 0 end) method_all,
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_EMAIL' then 1 else 0 end) method_01,
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_ETC' then 1 else 0 end) method_02,
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_PHONE' then 1 else 0 end) method_03,
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_POST' then 1 else 0 end) method_04,
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_REMOTE' then 1 else 0 end) method_05,
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_VISIT' then 1 else 0 end) method_06,
+
+		a.remark
+		from ts_work_sw_partner a
+		left join ts_work_history b on (
+			a.sub_cd = b.sub_cd
+			and b.req_dt between #{startDate} and #{endDate}
+			and b.CONTRACT_NO like CONCAT('%', #{customerCode}, '%')
+		)
+		where 1=1
+		and a.sub_cd in (select DISTINCT sub_cd from ts_work_sw_contract where CONTRACT_NO like CONCAT('%', #{customerCode}, '%') and DELETE_YN = 'N' and CONTRACT_YEAR = #{contractYear})
+		<if test="partnerContractCd != null and partnerContractCd != ''">
+			and a.partner_contract_cd = #{partnerContractCd}
+		</if>
+		group by a.sub_cd, a.comp_cd
+		order by a.sub_cd asc
+	</select>
+
+	<!-- 작업등록현황 (엑셀용) -->
+	<select id="getWorkRegistrationExcel" parameterType="map" resultType="com.hnix.sd.common.excel.dto.WorkRegistrationExcelFieldsDto">
+		SELECT
+			w.SERVICE_NO as serviceNo,
+			w.CONTRACT_NO as contractNo,
+			w.SUB_CD as subCd,
+			w.REQ_DT as reqDt,
+			w.REQ_COMP_CD as reqCompCd,
+			w.REQ_USER_ID as reqUserId,
+			w.STATUS_CD as statusCd,
+			w.PROC_DT as procDt,
+			w.PROC_USER_NM as procUserNm,
+			w.PROC_SUPPORT_CD as procSupportCd,
+			w.PROC_RESULT_CD as procResultCd,
+			w.REG_ID as regId,
+			w.REQ_CONTENTS as reqContents,
+			w.PROC_CONTENTS as procContents,
+			
+			(SELECT CODE_TEXT FROM TC_COMMON_CODE WHERE CODE_CD = w.PROC_SUPPORT_CD) as procSupportNm,
+			(SELECT CODE_TEXT FROM TC_COMMON_CODE WHERE CODE_CD = w.PROC_RESULT_CD) as procResultNm,
+			(SELECT CODE_TEXT FROM TC_COMMON_CODE WHERE CODE_CD = w.STATUS_CD) as statusNm,
+			
+			p.SW_CODE as swCd,
+			s.SW_NAME as swNm,
+			c.CODE_TEXT as serviceCdNm,
+			cd.COMPANY_NM as customerCompanyNm,
+			cd.DEPARTMENT_NM as customerDepartmentNm,
+			cd.MANAGE_NM as customerManageNm,
+			ru.USER_NM as reqUserNm,
+			ru.USER_DEPT_NM as userDeptNm,
+			rd.DEPARTMENT_NM as reqUserDepartmentNm,
+			rd.COMPANY_NM as reqUserCompanyNm,
+			pd.COMPANY_NM as procCompanyNm,
+			cert.CERT_CD as certCd,
+			cert.CERT_DT as certDt,
+			COALESCE(sv.POINT_DIS_YN, 'N') as pointDisYn,
+			ptd.COMPANY_NM as partnerCompanyNm
+		FROM TS_WORK_HISTORY w
+		INNER JOIN TS_WORK_SW_PARTNER p ON w.SUB_CD = p.SUB_CODE
+		INNER JOIN TS_WORK_SW s ON p.SW_CODE = s.SW_CODE
+		INNER JOIN TC_USER ru ON w.REQ_USER_ID = ru.USER_ID
+		LEFT JOIN TS_WORK_SURVEY sv ON sv.SERVICE_NO = w.SERVICE_NO
+		LEFT JOIN TC_COMMON_CODE c ON c.CODE_CD = w.SERVICE_CD
+		LEFT JOIN V_ORGANIZATION_STRUCTURE cd ON w.REQ_COMP_CD = cd.ORIGIN_CD
+		LEFT JOIN V_ORGANIZATION_STRUCTURE rd ON ru.DEPT_CD = rd.ORIGIN_CD
+		LEFT JOIN V_ORGANIZATION_STRUCTURE pd ON w.PROC_DEPT_CD = pd.ORIGIN_CD
+		LEFT JOIN V_ORGANIZATION_STRUCTURE ptd ON p.COMP_CODE = ptd.ORIGIN_CD
+		LEFT JOIN TS_WORK_CERT cert ON w.SERVICE_NO = cert.SERVICE_NO
+		<where>
+			<if test="startDate != null and endDate != null">
+				AND w.REQ_DT BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="customerCd != null and customerCd != ''">
+				AND cd.COMPANY_CD = #{customerCd}
+			</if>
+			<if test="departmentCd != null and departmentCd != ''">
+				AND (cd.MANAGE_CD = #{departmentCd} OR cd.PRNT_DEPT_CD = #{departmentCd})
+			</if>
+			<if test="partnerCd != null and partnerCd != ''">
+				AND ptd.COMPANY_CD = #{partnerCd}
+			</if>
+			<if test="satisfied == 'Y'">
+				AND sv.POINT_DIS_YN = 'Y'
+			</if>
+			<if test="softwareName != null and softwareName != ''">
+				AND s.SW_NAME LIKE CONCAT('%', #{softwareName}, '%')
+			</if>
+			<if test="subCode != null and subCode != ''">
+				AND p.SUB_CODE LIKE CONCAT('%', #{subCode}, '%')
+			</if>
+			
+			<choose>
+				<when test="isAdmin or isManage">
+				</when>
+				<when test="isDeptManage">
+					AND pd.COMPANY_CD = #{loginUserCompanyCd}
+				</when>
+				<otherwise>
+					AND (w.REG_ID = #{loginUserId} OR w.REQ_USER_ID = #{loginUserId})
+				</otherwise>
+			</choose>
+		</where>
+		ORDER BY w.REG_DT DESC
+	</select>
+
+	<!-- 작업결과현황 (엑셀용) -->
+	<select id="getWorkResultExcel" parameterType="map" resultType="com.hnix.sd.common.excel.dto.WorkResultExcelFieldsDto">
+		SELECT
+			w.service_no as serviceNo,
+			w.contract_no as contractNo,
+			w.sub_cd as subCd,
+			w.req_dt as reqDt,
+			w.req_comp_cd as reqCompCd,
+			w.req_user_id as reqUserId,
+			w.req_contents as reqContents,
+			w.proc_dt as procDt,
+			w.proc_user_nm as procUserNm,
+			w.proc_contents as procContents,
+			w.remark as remark,
+
+			(SELECT code_text FROM tc_common_code WHERE code_cd = w.proc_support_cd) as procSupportNm,
+			(SELECT code_text FROM tc_common_code WHERE code_cd = w.proc_result_cd) as procResultNm,
+			(SELECT code_text FROM tc_common_code WHERE code_cd = w.status_cd) as statusNm,
+
+			s.sw_name as swName,
+			c.code_text as serviceCdNm,
+			cd.company_nm as customerCompanyNm,
+			cd.department_nm as customerDepartmentNm,
+			cd.manage_nm as customerManageNm,
+			u.user_nm as reqUserNm,
+			u.user_dept_nm as userDeptNm,
+			rd.department_nm as reqUserDepartmentNm,
+			rd.company_nm as reqUserCompanyNm,
+			ctc.code_text as certCdNm,
+			pd.company_nm as partnerCompanyNm,
+			cert.cert_cd as certCd,
+			cert.cert_dt as certDt,
+			cert.cert_comment as certComment,
+			COALESCE(sv.point_dis_yn, 'N') as pointDisYn,
+			sv.point_sum as pointSum
+		FROM ts_work_history w
+		INNER JOIN ts_work_sw_partner p ON w.sub_cd = p.sub_code
+		INNER JOIN tc_user u ON w.req_user_id = u.user_id
+		INNER JOIN ts_work_sw s ON p.sw_code = s.sw_code
+		LEFT JOIN tc_common_code c ON w.service_cd = c.code_cd
+		LEFT JOIN tc_common_code ctc ON w.proc_result_cd = ctc.code_cd
+		LEFT JOIN ts_work_survey sv ON w.service_no = sv.service_no
+		LEFT JOIN ts_work_cert cert ON w.service_no = cert.service_no
+		LEFT JOIN v_organization_structure cd ON w.req_comp_cd = cd.origin_cd
+		LEFT JOIN v_organization_structure pd ON w.proc_dept_cd = pd.origin_cd
+		LEFT JOIN v_organization_structure rd ON u.dept_cd = rd.origin_cd
+		<where>
+			<if test="startDate != null and endDate != null">
+				AND w.req_dt BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="customerCd != null and customerCd != ''">
+				AND cd.company_cd = #{customerCd}
+			</if>
+			<if test="departmentCd != null and departmentCd != ''">
+				AND (cd.manage_cd = #{departmentCd} OR cd.prnt_dept_cd = #{departmentCd})
+			</if>
+			<if test="partnerCd != null and partnerCd != ''">
+				AND pd.company_cd = #{partnerCd}
+			</if>
+			<if test="satisfied == 'Y'">
+				AND sv.point_dis_yn = 'Y'
+			</if>
+			<if test="softwareName != null and softwareName != ''">
+				AND s.sw_name LIKE CONCAT('%', #{softwareName}, '%')
+			</if>
+			<if test="subCode != null and subCode != ''">
+				AND p.sub_code LIKE CONCAT('%', #{subCode}, '%')
+			</if>
+
+			<choose>
+				<when test="isAdmin or isManage">
+				</when>
+				<when test="isDeptManage">
+					AND rd.company_cd = #{loginUserCompanyCd}
+				</when>
+				<otherwise>
+					AND w.req_user_id = #{loginUserId}
+				</otherwise>
+			</choose>
+		</where>
+		ORDER BY w.reg_dt DESC
+	</select>
+
+</mapper>

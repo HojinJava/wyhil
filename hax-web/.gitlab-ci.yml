@@ -1,0 +1,67 @@
+stages:
+  - build    # 1. Maven 컴파일 및 WAR 생성
+  - package  # 2. Docker 이미지 빌드 (순서 분리)
+  - deploy   # 3. 원격 서버 배포
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  CONTAINER_NAME: "hax-web-server"
+  IMAGE_NAME: "po12022/hax-web-server:latest"
+  SSH_USER: "ubuntu"
+  DOCKER_HOST: "unix:///var/run/docker.sock"
+
+cache:
+  paths:
+    - .m2/repository
+
+# 1. Maven 빌드 단계
+maven-build:
+  stage: build
+  image: maven:3.9.6-eclipse-temurin-21
+  tags:
+    - ci-docker
+  script:
+    - mvn -DskipTests -B package
+  artifacts:
+    paths:
+      - target/hax-web.war
+    expire_in: 1 week
+  only:
+    - main
+
+# 2. Docker 이미지 빌드 및 푸시 (stage를 package로 변경)
+docker-build:
+  stage: package
+  image: docker:25.0.3
+  services:
+    - docker:25.0.3-dind
+  tags:
+    - ci-docker
+  dependencies:
+    - maven-build
+  before_script:
+    - apk add --no-cache git ca-certificates
+    - echo '$martdept' | docker login -u "po12022" --password-stdin docker.io
+  script:
+    - echo "--- Building Docker Image ---"
+    - docker build -t $IMAGE_NAME .
+    - echo "--- Pushing Docker Image ---"
+    - docker push $IMAGE_NAME
+  only:
+    - main
+
+# 3. 배포 단계
+deploy-job:
+  stage: deploy
+  image: docker:25.0.3-cli
+  tags:
+    - ci-docker
+  only:
+    - main
+  before_script:
+    - apk add --no-cache openssh-client sshpass
+  script:
+    - echo "--- Deploying to Remote Server ---"
+    # 변수 대신 포트(-p 8022)를 명시적으로 고정했습니다.
+    - sshpass -p "$SERVER_PW" ssh -p 8022 -o StrictHostKeyChecking=no "$SSH_USER"@"$SERVER_IP" "docker pull $IMAGE_NAME && docker stop $CONTAINER_NAME || true && docker rm $CONTAINER_NAME || true && docker run -d --name $CONTAINER_NAME --restart always -p 8080:8080 --network bridge $IMAGE_NAME"
+    - echo "--- Deployment complete! ---"

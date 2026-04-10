@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.user.dao.UserLogDao">
+
+    <resultMap id="UserLogResultMap" type="com.hnix.sd.common.user.dto.UserLogDto">
+        <id property="userId" column="USER_ID"/>
+        <id property="accessUserId" column="ACCESS_USER_ID"/>
+        <id property="accessDt" column="ACCESS_DT"/>
+        <result property="accessType" column="ACCESS_TYPE"/>
+        <result property="accessCond" column="ACCESS_COND"/>
+        <result property="remark" column="REMARK"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hnix.sd.common.user.dto.UserLogDto">
+        INSERT INTO TC_USER_LOG (
+            USER_ID, ACCESS_USER_ID, ACCESS_DT, ACCESS_TYPE, ACCESS_COND, REMARK
+        ) VALUES (
+            #{userId}, #{accessUserId}, #{accessDt}, #{accessType}, #{accessCond}, #{remark}
+        )
+    </insert>
+
+    <select id="findAll" resultMap="UserLogResultMap">
+        SELECT * FROM TC_USER_LOG
+    </select>
+
+    <select id="findByUserId" resultMap="UserLogResultMap">
+        SELECT * FROM TC_USER_LOG WHERE USER_ID = #{userId}
+    </select>
+
+</mapper>

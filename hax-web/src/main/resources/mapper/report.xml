@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.dao.WorkDao">
+
+
+
+	<!---->
+	<select id="getReportPartner" parameterType="map" resultType="map">
+
+		select
+		data.*,
+		(case when sw_count > 1 then CONCAT(data.sw_nm, ' 외 ', data.sw_count - 1, '종') else data.sw_nm end) sw_nm_full
+
+		from (
+
+			select
+
+			(select company_nm from v_organization_structure where origin_cd = a.comp_cd) support_company_nm,
+			(select sw_nm from ts_work_sw where sw_cd = a.sw_cd) sw_nm,
+			(
+				select count(*)
+				from ts_work_sw_partner
+				where comp_cd = a.comp_cd
+				and sub_cd in (select DISTINCT sub_cd from ts_work_sw_contract where CONTRACT_NO like CONCAT('%', #{customerCode}, '%') and DELETE_YN = 'N' and CONTRACT_YEAR = #{contractYear})
+			) sw_count,
+
+			sum(case when b.service_no is not null then 1 else 0 end) sum_total, -- "서비스항목_전체",
+			sum(case when b.service_cd = 'SERVICE_ITEM_PATCH' then 1 else 0 end) sum_01, -- "PATCH",
+			sum(case when b.service_cd = 'SERVICE_ITEM_UPGRADE' then 1 else 0 end) sum_02, -- "UPGRADE",
+			sum(case when b.service_cd = 'SERVICE_ITEM_EDU' then 1 else 0 end) sum_03, -- "교육지원",
+			sum(case when b.service_cd = 'SERVICE_ITEM_CUSTOM' then 1 else 0 end) sum_04, -- "맞춤지원",
+			sum(case when b.service_cd = 'SERVICE_ITEM_TECH' then 1 else 0 end) sum_05, -- "신기술제공",
+			sum(case when b.service_cd = 'SERVICE_ITEM_DAILY' then 1 else 0 end) sum_06, -- "일상지원",
+			sum(case when b.service_cd = 'SERVICE_ITEM_ERROR' then 1 else 0 end) sum_07, -- "장애지원",
+			sum(case when b.service_cd = 'SERVICE_ITEM_PERIODIC' then 1 else 0 end) sum_08, -- "정기점검",
+
+			sum(case when b.service_no is not null then 1 else 0 end) method_all, -- "지원매체_전체",
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_EMAIL' then 1 else 0 end) method_01, -- "E-mail",
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_ETC' then 1 else 0 end) method_02, -- "기타",
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_PHONE' then 1 else 0 end) method_03, -- "전화",
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_POST' then 1 else 0 end) method_04, -- "우편",
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_REMOTE' then 1 else 0 end) method_05, -- "원격",
+			sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_VISIT' then 1 else 0 end) method_06 -- "방문"
+
+			from ts_work_sw_partner a
+
+			left join ts_work_history b on (
+			a.sub_cd = b.sub_cd
+			and b.req_dt between #{startDate} and #{endDate}
+			and b.CONTRACT_NO like CONCAT('%', #{customerCode}, '%') -- CONTRACT_NO 계약번호
+			)
+
+			where 1=1
+
+			and a.sub_cd in (select DISTINCT sub_cd from ts_work_sw_contract where CONTRACT_NO like CONCAT('%', #{customerCode}, '%') and DELETE_YN = 'N' and CONTRACT_YEAR = #{contractYear})
+
+			group by a.comp_cd
+		) data
+
+		order by data.support_company_nm asc
+
+	</select>
+
+
+
+
+	<!---->
+	<select id="getReportSubcode" parameterType="map" resultType="map">
+
+
+
+		select
+		a.sub_cd,
+		a.partner_contract_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.partner_contract_cd) partner_contract_cd_text,
+		a.regular_service_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.regular_service_cd) regular_service_cd_text,
+		a.subscription_yn,
+		(select company_nm from v_organization_structure where origin_cd = a.comp_cd) support_company_nm,
+		(select sw_nm from ts_work_sw where sw_cd = a.sw_cd) sw_nm,
+
+		sum(case when b.service_no is not null then 1 else 0 end) sum_total, -- "서비스항목_전체",
+		sum(case when b.service_cd = 'SERVICE_ITEM_PATCH' then 1 else 0 end) sum_01, -- "PATCH",
+		sum(case when b.service_cd = 'SERVICE_ITEM_UPGRADE' then 1 else 0 end) sum_02, -- "UPGRADE",
+		sum(case when b.service_cd = 'SERVICE_ITEM_EDU' then 1 else 0 end) sum_03, -- "교육지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_CUSTOM' then 1 else 0 end) sum_04, -- "맞춤지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_TECH' then 1 else 0 end) sum_05, -- "신기술제공",
+		sum(case when b.service_cd = 'SERVICE_ITEM_DAILY' then 1 else 0 end) sum_06, -- "일상지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_ERROR' then 1 else 0 end) sum_07, -- "장애지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_PERIODIC' then 1 else 0 end) sum_08, -- "정기점검",
+
+		sum(case when b.service_no is not null then 1 else 0 end) method_all, -- "지원매체_전체",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_EMAIL' then 1 else 0 end) method_01, -- "E-mail",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_ETC' then 1 else 0 end) method_02, -- "기타",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_PHONE' then 1 else 0 end) method_03, -- "전화",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_POST' then 1 else 0 end) method_04, -- "우편",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_REMOTE' then 1 else 0 end) method_05, -- "원격",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_VISIT' then 1 else 0 end) method_06, -- "방문"
+
+		a.remark
+
+		from ts_work_sw_partner a
+
+		left join ts_work_history b on (
+			a.sub_cd = b.sub_cd
+			and b.req_dt between #{startDate} and #{endDate}
+			and b.CONTRACT_NO like CONCAT('%', #{customerCode}, '%')
+		)
+
+		where 1=1
+		and a.sub_cd in (select DISTINCT sub_cd from ts_work_sw_contract where CONTRACT_NO like CONCAT('%', #{customerCode}, '%') and DELETE_YN = 'N' and CONTRACT_YEAR = #{contractYear})
+		<if test="partnerContractCd != null and partnerContractCd != ''">
+			and a.partner_contract_cd = #{partnerContractCd}
+		</if>
+		group by a.sub_cd, a.comp_cd
+
+		order by a.sub_cd asc
+
+
+	</select>
+
+
+	<select id="getReportSubcodeDetail" parameterType="map" resultType="map">
+
+
+
+		select
+		a.sub_cd,
+		a.partner_contract_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.partner_contract_cd) partner_contract_cd_text,
+		a.regular_service_cd,
+		(SELECT code_text FROM tc_common_code WHERE code_cd = a.regular_service_cd) regular_service_cd_text,
+		a.subscription_yn,
+		(select company_nm from v_organization_structure where origin_cd = a.comp_cd) support_company_nm,
+		(select sw_nm from ts_work_sw where sw_cd = a.sw_cd) sw_nm,
+
+		sum(case when b.service_no is not null then 1 else 0 end) sum_total, -- "서비스항목_전체",
+		sum(case when b.service_cd = 'SERVICE_ITEM_PATCH' then 1 else 0 end) sum_01, -- "PATCH",
+		sum(case when b.service_cd = 'SERVICE_ITEM_UPGRADE' then 1 else 0 end) sum_02, -- "UPGRADE",
+		sum(case when b.service_cd = 'SERVICE_ITEM_EDU' then 1 else 0 end) sum_03, -- "교육지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_CUSTOM' then 1 else 0 end) sum_04, -- "맞춤지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_TECH' then 1 else 0 end) sum_05, -- "신기술제공",
+		sum(case when b.service_cd = 'SERVICE_ITEM_DAILY' then 1 else 0 end) sum_06, -- "일상지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_ERROR' then 1 else 0 end) sum_07, -- "장애지원",
+		sum(case when b.service_cd = 'SERVICE_ITEM_PERIODIC' then 1 else 0 end) sum_08, -- "정기점검",
+
+		sum(case when b.service_no is not null then 1 else 0 end) method_all, -- "지원매체_전체",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_EMAIL' then 1 else 0 end) method_01, -- "E-mail",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_ETC' then 1 else 0 end) method_02, -- "기타",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_PHONE' then 1 else 0 end) method_03, -- "전화",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_POST' then 1 else 0 end) method_04, -- "우편",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_REMOTE' then 1 else 0 end) method_05, -- "원격",
+		sum(case when b.proc_support_cd = 'PROCESS_SUPPORT_VISIT' then 1 else 0 end) method_06, -- "방문"
+
+		a.remark
+
+		from ts_work_sw_partner a
+
+		left join ts_work_history b on (
+			a.sub_cd = b.sub_cd
+			and b.req_dt between #{startDate} and #{endDate}
+			and b.CONTRACT_NO like CONCAT('%', #{customerCode}, '%')
+		)
+
+		where 1=1
+		and a.sub_cd = #{subCd}
+		group by a.sub_cd, a.comp_cd
+
+		order by a.sub_cd asc
+
+
+	</select>
+
+
+</mapper>

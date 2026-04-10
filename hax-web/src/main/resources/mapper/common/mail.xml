@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.common.mail.dao.MailDao">
+
+    <select id="findByCompCdAndMailTypeCdEntity" resultType="com.hnix.sd.common.mail.dto.MailDto">
+        SELECT *
+        FROM TC_MAIL_FORM
+        WHERE COMP_CD = #{compCd}
+          AND MAIL_TYPE_CD = #{mailTypeCd}
+    </select>
+
+    <select id="findByUserDeptCdAndMailTypeCdEntity" resultType="com.hnix.sd.common.mail.dto.MailDto">
+        SELECT M.*
+        FROM TC_MAIL_FORM M
+        JOIN V_ORGANIZATION_STRUCTURE V ON M.COMP_CD = V.MGR_COMP_CD
+        WHERE V.DEPT_CD = #{deptCd}
+          AND M.MAIL_TYPE_CD = #{mailTypeCd}
+    </select>
+
+    <select id="findByCompCd" resultType="map">
+        SELECT 
+            V.MGR_COMP_NM as deptNm,
+            C.CODE_TEXT as codeText,
+            M.COMP_CD as compCd,
+            M.MAIL_TYPE_CD as mailTypeCd,
+            M.MAIL_TITLE as mailTitle,
+            M.MAIL_CONT as mailCont,
+            M.MAIL_DESC as mailDesc
+        FROM TC_MAIL_FORM M
+        LEFT JOIN V_ORGANIZATION_STRUCTURE V ON M.COMP_CD = V.MGR_COMP_CD
+        LEFT JOIN TC_CODE C ON M.MAIL_TYPE_CD = C.CODE_CD AND C.GROUP_CD = 'MAIL_TYPE'
+        WHERE M.COMP_CD = #{compCd}
+    </select>
+
+    <insert id="insertMail">
+        INSERT INTO TC_MAIL_FORM (
+            COMP_CD, MAIL_TYPE_CD, MAIL_TITLE, MAIL_CONT, MAIL_DESC, REG_DT, REG_ID
+        ) VALUES (
+            #{compCd}, #{mailTypeCd}, #{mailTitle}, #{mailCont}, #{mailDesc}, NOW(), #{regId}
+        )
+    </insert>
+
+    <update id="updateMail">
+        UPDATE TC_MAIL_FORM
+        SET MAIL_TITLE = #{mailTitle},
+            MAIL_CONT = #{mailCont},
+            MAIL_DESC = #{mailDesc},
+            MOD_DT = NOW(),
+            MOD_ID = #{modId}
+        WHERE COMP_CD = #{compCd}
+          AND MAIL_TYPE_CD = #{mailTypeCd}
+    </update>
+
+    <delete id="deleteMail">
+        DELETE FROM TC_MAIL_FORM
+        WHERE COMP_CD = #{compCd}
+          AND MAIL_TYPE_CD = #{mailTypeCd}
+    </delete>
+
+</mapper>

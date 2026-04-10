@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.auth.menu.dao.MenuAuthDao">
+
+    <resultMap id="menuAuthResultMap" type="com.hnix.sd.common.auth.menu.dto.MenuAuthDto">
+        <id column="MENU_CD" property="menuCd"/>
+        <id column="GROUP_CD" property="groupCd"/>
+        <result column="AUTH_CREATE_YN" property="authCreateYn"/>
+        <result column="AUTH_UPDATE_YN" property="authUpdateYn"/>
+        <result column="AUTH_READ_YN" property="authReadYn"/>
+        <result column="AUTH_DELETE_YN" property="authDeleteYn"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="MOD_ID" property="modId"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="MOD_DT" property="modDt"/>
+    </resultMap>
+
+    <resultMap id="menuResultMap" type="com.hnix.sd.common.menu.dto.MenuDto">
+        <id column="MENU_CD" property="menuCd"/>
+        <result column="MENU_NM" property="menuNm"/>
+        <result column="MENU_DESC" property="menuDesc"/>
+        <result column="MENU_LINK" property="menuLink"/>
+        <result column="MENU_LEVEL" property="menuLevel"/>
+        <result column="MENU_SORT" property="menuSort"/>
+        <result column="PRNT_MENU_CD" property="prntMenuCd"/>
+        <result column="USE_YN" property="useYn"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="MOD_ID" property="modId"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="MOD_DT" property="modDt"/>
+    </resultMap>
+
+    <select id="findByMenuCdAndGroupCd" resultMap="menuAuthResultMap">
+        SELECT * FROM TC_AUTH_GROUP_MENU
+        WHERE MENU_CD = #{menuCd} AND GROUP_CD = #{groupCd}
+    </select>
+
+    <select id="findAllByGroupCd" resultType="[Ljava.lang.Object;">
+        SELECT ma.*, m.*
+        FROM TC_AUTH_GROUP_MENU ma
+        INNER JOIN TC_MENU m ON ma.MENU_CD = m.MENU_CD
+        WHERE ma.GROUP_CD = #{groupCd}
+        ORDER BY m.MENU_SORT ASC
+    </select>
+
+    <insert id="insert" parameterType="com.hnix.sd.common.auth.menu.dto.MenuAuthDto">
+        INSERT INTO TC_AUTH_GROUP_MENU (
+            MENU_CD, GROUP_CD, AUTH_CREATE_YN, AUTH_UPDATE_YN, AUTH_READ_YN, AUTH_DELETE_YN,
+            REG_ID, MOD_ID, REG_DT, MOD_DT
+        ) VALUES (
+            #{menuCd}, #{groupCd}, #{authCreateYn}, #{authUpdateYn}, #{authReadYn}, #{authDeleteYn},
+            #{regId}, #{modId}, NOW(), NOW()
+        )
+    </insert>
+
+    <select id="getLoginUserMenuAccess" resultType="com.hnix.sd.common.auth.menu.dto.LoginUserMenuDto">
+        SELECT 
+            m.MENU_CD as menuCd,
+            m.MENU_NM as menuNm,
+            m.MENU_LINK as menuLink,
+            MAX(ma.AUTH_CREATE_YN) as authCreateYn,
+            MAX(ma.AUTH_READ_YN) as authReadYn,
+            MAX(ma.AUTH_UPDATE_YN) as authUpdateYn,
+            MAX(ma.AUTH_DELETE_YN) as authDeleteYn,
+            m.MENU_DESC as menuDesc,
+            m.MENU_LEVEL as menuLevel,
+            m.MENU_SORT as menuSort,
+            m.PRNT_MENU_CD as prntMenuCd,
+            m.USE_YN as useYn
+        FROM TC_AUTH_GROUP_USER userAuth
+        LEFT JOIN TC_AUTH_GROUP_MENU ma ON userAuth.GROUP_CD = ma.GROUP_CD
+        INNER JOIN TC_MENU m ON ma.MENU_CD = m.MENU_CD
+        WHERE userAuth.USER_ID = #{userId}
+        GROUP BY 
+            m.MENU_CD, m.MENU_NM, m.MENU_LINK,
+            m.MENU_DESC, m.MENU_LEVEL, m.MENU_SORT, m.PRNT_MENU_CD
+        ORDER BY m.MENU_LEVEL ASC, m.MENU_SORT ASC
+    </select>
+
+</mapper>

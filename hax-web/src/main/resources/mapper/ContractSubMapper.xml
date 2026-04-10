@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.software.contract.dao.ContractSubDao">
+
+    <resultMap id="contractSubResultMap" type="com.hnix.sd.work.software.contract.dto.ContractSubDto">
+        <id column="CONTRACT_NO" property="contractNo"/>
+        <result column="MGR_DEPT_NM" property="mgrDeptNm"/>
+        <result column="MGR_DEPT_COMP_NM" property="mgrDeptCompNm"/>
+        <result column="MGR_DEPT_BIZ_NM" property="mgrDeptBizNm"/>
+        <result column="SW_NM" property="swNm"/>
+        <result column="PARTNER_COMP_CD" property="partnerCompCd"/>
+        <result column="PARTNER_COMP_NM" property="partnerCompNm"/>
+    </resultMap>
+
+    <select id="findByContractNo" resultMap="contractSubResultMap">
+        SELECT a.CONTRACT_NO,
+               org04.manage_nm mgr_dept_nm,
+               org04.company_nm mgr_dept_comp_nm,
+               org04.department_nm mgr_dept_biz_nm,
+               d.sw_nm,
+               c.comp_cd partner_comp_cd,
+               e.dept_nm partner_comp_nm
+        FROM ts_work_sw_contract a
+        LEFT JOIN v_organization_structure org04 ON org04.origin_Cd = a.dept_cd
+        LEFT JOIN TS_WORK_SW_PARTNER c ON c.sub_cd = a.sub_Cd
+        LEFT JOIN TS_WORK_SW d ON d.sw_Cd = c.sw_cd
+        LEFT JOIN tc_dept e on e.DEPT_CD = c.COMP_CD
+        WHERE a.contract_no = #{contractNo}
+    </select>
+
+    <insert id="insertByContractNo">
+        INSERT INTO TS_WORK_SW_CONTRACT_SUB (
+            CONTRACT_NO, MGR_DEPT_NM, MGR_DEPT_COMP_NM, MGR_DEPT_BIZ_NM, SW_NM, PARTNER_COMP_CD, PARTNER_COMP_NM
+        )
+        SELECT a.contract_no,
+               org04.manage_nm mgr_dept_nm,
+               org04.company_nm mgr_dept_comp_nm,
+               org04.department_nm mgr_dept_biz_nm,
+               d.sw_nm,
+               c.comp_cd partner_comp_cd,
+               e.dept_nm partner_comp_nm
+        FROM ts_work_sw_contract a
+        LEFT JOIN v_organization_structure org04 ON org04.origin_Cd = a.dept_cd
+        LEFT JOIN TS_WORK_SW_PARTNER c ON c.sub_cd = a.sub_Cd
+        LEFT JOIN TS_WORK_SW d ON d.sw_Cd = c.sw_cd
+        LEFT JOIN tc_dept e on e.DEPT_CD = c.COMP_CD
+        WHERE a.contract_no = #{contractNo}
+    </insert>
+
+</mapper>

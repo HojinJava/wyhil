@@ -1,0 +1,39 @@
+200ok:
+  desc: '성공'
+  status: '200' 
+userNotFound:
+  desc: 'User Infomation Not Found.'
+  status: '202'
+Unauthorized:
+  desc: 'Authentication Failure'
+  status: '401'
+UserP1_Exception:
+  status: '500'
+  desc: '{0}'
+UserP2_Exception:
+  status: '500'
+  desc: '{0} {1}'
+login:
+  desc: '성공'
+  status: '200' 
+logout:
+  desc: '성공'
+  status: '200'
+loginFail:
+  desc: 'Login Failed.'
+  status: '398'
+userAlreadyExist:
+  desc: 'User already exist.'
+  status: '312'
+AccessDenied:
+  desc: 'Access Denied.'
+  status: '403'
+noUploadFile:
+  desc: 'This file cannot be uploaded.'
+  status: '397'
+fileSizeExceed:
+  desc: 'Upload file size exceeded.'
+  status: '397'
+fileUploadFail:
+  desc: 'File upload Failed'
+  status: '397'

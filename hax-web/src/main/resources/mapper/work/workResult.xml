@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.work.result.dao.WorkResultDao">
+
+    <sql id="workResultBase">
+        SELECT
+            wr.SERVICE_NO as serviceNo,
+            wr.CONTRACT_NO as contractNo,
+            wr.SUB_CD as subCd,
+            wr.REQ_DT as reqDt,
+            wr.REQ_COMP_CD as reqCompCd,
+            wr.REQ_USER_ID as reqUserId,
+            wr.REQ_CONTENTS as reqContents,
+            wr.PROC_DT as procDt,
+            wr.PROC_USER_NM as procUserNm,
+            wr.PROC_SUPPORT_CD as procSupportCd,
+            wr.PROC_CONTENTS as procContents,
+            wr.REMARK as remark,
+            (SELECT c.CODE_TEXT FROM TC_COMMON_CODE c WHERE c.CODE_CD = wr.PROC_SUPPORT_CD LIMIT 1) as procSupportNm,
+            (SELECT c.CODE_TEXT FROM TC_COMMON_CODE c WHERE c.CODE_CD = wr.PROC_RESULT_CD LIMIT 1) as procResultNm,
+            (SELECT c.CODE_TEXT FROM TC_COMMON_CODE c WHERE c.CODE_CD = wr.STATUS_CD LIMIT 1) as statusNm,
+            (SELECT GROUP_CONCAT(DISTINCT f.FILE_NM SEPARATOR ', ') FROM TC_FILE f WHERE f.FILE_ID = wr.SERVICE_NO AND f.DEL_YN = 'N') as fileNames,
+            s.SW_NM as swName,
+            svc.CODE_TEXT as serviceCdNm,
+            cust.COMPANY_NM as customerCompanyNm,
+            cust.DEPARTMENT_NM as customerDepartmentNm,
+            cust.MANAGE_NM as customerManageNm,
+            u.USER_NM as reqUserNm,
+            u.USER_DEPT_NM as userDeptNm,
+            reqd.DEPARTMENT_NM as reqUserDepartmentNm,
+            reqd.COMPANY_NM as reqUserCompanyNm,
+            certc.CODE_TEXT as certCdNm,
+            partd.COMPANY_NM as partnerCompanyNm,
+            cert.CERT_CD as certCd,
+            cert.CERT_DT as certDt,
+            cert.CERT_COMMENT as certComment,
+            COALESCE(surv.POINT_DIS_YN, 'N') as pointDisYn,
+            surv.POINT_SUM as pointSum
+        FROM TS_WORK_HISTORY wr
+        INNER JOIN TS_WORK_SW_PARTNER p ON wr.SUB_CD = p.SUB_CD
+        INNER JOIN TC_USER u ON wr.REQ_USER_ID = u.USER_ID
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN TC_COMMON_CODE svc ON wr.SERVICE_CD = svc.CODE_CD
+        LEFT JOIN TC_COMMON_CODE certc ON wr.PROC_RESULT_CD = certc.CODE_CD
+        LEFT JOIN TS_WORK_SURVEY surv ON wr.SERVICE_NO = surv.SERVICE_NO
+        LEFT JOIN TS_WORK_CERT cert ON wr.SERVICE_NO = cert.SERVICE_NO
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON wr.REQ_COMP_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE partd ON wr.PROC_DEPT_CD = partd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE reqd ON u.DEPT_CD = reqd.ORIGIN_CD
+        WHERE 1=1
+    </sql>
+
+    <sql id="searchConditions">
+        <if test="startDate != null and endDate != null">
+            AND wr.REQ_DT BETWEEN #{startDate} AND DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        </if>
+        <if test="customerCompanyCd != null and customerCompanyCd != ''">
+            AND cust.COMPANY_CD = #{customerCompanyCd}
+        </if>
+        <if test="departmentCd != null and departmentCd != ''">
+            AND (cust.MANAGE_CD = #{departmentCd} OR cust.PRNT_DEPT_CD = #{departmentCd})
+        </if>
+        <if test="partnerCompanyCd != null and partnerCompanyCd != ''">
+            AND partd.COMPANY_CD = #{partnerCompanyCd}
+        </if>
+        
+        <!-- 권한 기반 ?�터�?-->
+        <choose>
+            <when test="isAdmin or isManage">
+                <!-- ?�체 조회 -->
+            </when>
+            <when test="isDeptManage">
+                AND reqd.COMPANY_CD = #{loginUserCompanyCd}
+            </when>
+            <otherwise>
+                AND wr.REQ_USER_ID = #{userId}
+            </otherwise>
+        </choose>
+
+        <if test="softwareName != null and softwareName != ''">
+            AND s.SW_NM LIKE CONCAT('%', #{softwareName}, '%')
+        </if>
+        <if test="subCode != null and subCode != ''">
+            AND p.SUB_CD LIKE CONCAT('%', #{subCode}, '%')
+        </if>
+        <if test="satisfied != null and satisfied == 'Y'">
+            AND surv.POINT_DIS_YN = 'Y'
+        </if>
+    </sql>
+
+    <select id="findWorkResultPagination" resultType="com.hnix.sd.work.result.dto.WorkResultGridDto">
+        <include refid="workResultBase"/>
+        <include refid="searchConditions"/>
+        <choose>
+            <when test="criteria != null and criteria != ''">
+                ORDER BY ${criteria} ${sort}
+            </when>
+            <otherwise>
+                ORDER BY wr.REG_DT DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countWorkResultPagination" resultType="long">
+        SELECT COUNT(*)
+        FROM TS_WORK_HISTORY wr
+        INNER JOIN TS_WORK_SW_PARTNER p ON wr.SUB_CD = p.SUB_CD
+        INNER JOIN TC_USER u ON wr.REQ_USER_ID = u.USER_ID
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN TS_WORK_SURVEY surv ON wr.SERVICE_NO = surv.SERVICE_NO
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON wr.REQ_COMP_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE partd ON wr.PROC_DEPT_CD = partd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE reqd ON u.DEPT_CD = reqd.ORIGIN_CD
+        WHERE 1=1
+        <include refid="searchConditions"/>
+    </select>
+
+    <select id="findWorkResultWithExcel" resultType="com.hnix.sd.common.excel.dto.WorkResultExcelFieldsDto">
+        <include refid="workResultBase"/>
+        <include refid="searchConditions"/>
+        ORDER BY wr.REG_DT DESC
+    </select>
+
+</mapper>
