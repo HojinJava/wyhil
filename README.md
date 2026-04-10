@@ -35,7 +35,7 @@ gh auth login
 
 ## 흐름도
 
-![vibe-eval 워크플로우](.claude/vibe_eval_workflow.svg)
+![vibe-eval 워크플로우](.claude/test.png)
 
 ---
 
