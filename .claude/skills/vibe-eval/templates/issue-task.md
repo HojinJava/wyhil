@@ -36,7 +36,7 @@ PR 올리기 전 Commits 탭에서 본인 커밋이 1개인지 확인한다.
 PR 생성이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
 
 ```
-git mv {TARGET_DIR}/task/issue-{ISSUE_NUMBER}.md {TARGET_DIR}/task_done/issue-{ISSUE_NUMBER}.md
+git mv task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md task_done/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md
 git commit -m "chore: move issue-{ISSUE_NUMBER} task to task_done"
 git push origin vibe/{MODEL}/{SLUG}-{ISSUE_NUMBER}
 ```

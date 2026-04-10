@@ -163,7 +163,7 @@ gh issue create \
 
 3. 기존 파일 SHA 조회 (파일이 이미 있으면 덮어쓰기 위해 필요):
    ```bash
-   FILE_PATH="{TARGET_DIR}/task/issue-{ISSUE_NUMBER}.md"
+   FILE_PATH="task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md"
    SHA=$(gh api "repos/{REPO}/contents/$FILE_PATH?ref={MODEL_BRANCH}" --jq '.sha' 2>/dev/null || echo "")
    ```
 
@@ -185,7 +185,7 @@ TARGET_DIR이 미지정인 경우 FILE_PATH는 `task/issue-{ISSUE_NUMBER}.md`로
 main용 파일은 `issue-task.md` 템플릿에서 `{MODEL}` 자리에 `{모델명}` 그대로 두고, 나머지 변수만 치환하여 참고용으로 push한다:
 
 ```bash
-FILE_PATH="{TARGET_DIR}/task/issue-{ISSUE_NUMBER}.md"
+FILE_PATH="task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md"
 SHA=$(gh api "repos/{REPO}/contents/$FILE_PATH?ref=main" --jq '.sha' 2>/dev/null || echo "")
 gh api -X PUT "repos/{REPO}/contents/$FILE_PATH" \
   --field message="chore: add issue-{ISSUE_NUMBER} task file [skip ci]" \
