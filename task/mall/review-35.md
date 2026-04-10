@@ -1,11 +1,11 @@
-# feat: add console print on server start — 리뷰 지시 (#35)
+# mall/test_11 — 리뷰 지시 (#35)
 
 ## 리뷰할 PR
 
-PR #41 — Codex 모델 작업물
+PR #44 — Claude 모델 작업물
 
 아래 명령으로 PR 내용을 확인한다.
-gh pr view 41 --repo HojinJava/wyhil
+gh pr view 44 --repo HojinJava/wyhil
 
 ## 평가 기준
 
@@ -17,7 +17,7 @@ gh pr view 41 --repo HojinJava/wyhil
 
 ## 제출 방식
 
-평가 완료 후 아래 양식을 PR #41 댓글로 등록한다.
+평가 완료 후 아래 양식을 PR #44 댓글로 등록한다.
 
 종합 평점: /5
 공통 프롬프트 이행 (1~5):
