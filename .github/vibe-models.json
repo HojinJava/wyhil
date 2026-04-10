@@ -20,7 +20,7 @@
     },
     "antigravity": {
       "display_name": "안티그래비티",
-      "github_accounts": ["myoungsuboh", "SeJin4019"],
+      "github_accounts": ["myoungsuboh", "SeJin4019", "HojinJava"],
       "label": "model:안티그래비티",
       "base_branch": "antigravity"
     },
