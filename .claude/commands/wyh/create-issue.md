@@ -33,8 +33,14 @@ description: Use when creating a new vibe-eval GitHub issue for this project. Co
 - 입력값을 TITLE_RAW로 저장
 
 **Q3. 프롬프트 레벨**
-"난이도 레벨을 선택하세요: L1 (단순) / L2 (중간) / L3 (복잡)"
+```
+난이도 레벨을 선택하세요:
+1. L1 (단순)
+2. L2 (중간)
+3. L3 (복잡)
+```
 
+- 숫자(1/2/3) 또는 직접 L1/L2/L3 입력 모두 허용
 - 입력값을 LEVEL로 저장 (L1 / L2 / L3)
 - TITLE = `{PROJECT_ALIAS}/{TITLE_RAW} [{LEVEL}]`
 
