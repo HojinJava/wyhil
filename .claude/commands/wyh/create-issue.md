@@ -181,6 +181,19 @@ gh issue create \
 
 TARGET_DIR이 미지정인 경우 FILE_PATH는 `task/issue-{ISSUE_NUMBER}.md`로 사용한다.
 
+모델 브랜치 배포가 모두 끝난 후, **main 브랜치에도 동일한 파일을 추가**한다.  
+main용 파일은 `issue-task.md` 템플릿에서 `{MODEL}` 자리에 `{모델명}` 그대로 두고, 나머지 변수만 치환하여 참고용으로 push한다:
+
+```bash
+FILE_PATH="{TARGET_DIR}/task/issue-{ISSUE_NUMBER}.md"
+SHA=$(gh api "repos/{REPO}/contents/$FILE_PATH?ref=main" --jq '.sha' 2>/dev/null || echo "")
+gh api -X PUT "repos/{REPO}/contents/$FILE_PATH" \
+  --field message="chore: add issue-{ISSUE_NUMBER} task file [skip ci]" \
+  --field content="$(echo -n '{치환된내용}' | base64)" \
+  --field branch="main" \
+  [--field sha="$SHA" (SHA가 있는 경우만)]
+```
+
 ### 6단계: 세션 파일 생성
 
 `COMBINED_SLUG = {SLUG}-{ISSUE_NUMBER}`
