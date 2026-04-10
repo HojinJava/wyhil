@@ -180,6 +180,32 @@ repo/
 
 ---
 
+## 사전 준비
+
+관리자 커맨드(`/wyh:*`)는 내부적으로 GitHub CLI(`gh`)를 사용합니다.
+
+```bash
+# macOS
+brew install gh
+
+# Windows (winget)
+winget install --id GitHub.cli
+
+# Windows (scoop)
+scoop install gh
+
+# Linux (apt)
+sudo apt install gh
+```
+
+설치 후 로그인:
+
+```bash
+gh auth login
+```
+
+---
+
 ## 관리자 기능
 
 Claude Code에서 `/명령어`로 실행하는 프로젝트 전용 관리 커맨드입니다.
