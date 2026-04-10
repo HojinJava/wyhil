@@ -29,6 +29,7 @@ namespace BinaryPacketServer
 
             if (IsResult)
             {
+                Console.WriteLine("🚀 서버가 실행됩니다.");
                 DevLog.Write(string.Format("서버 네트워크 시작"), LOG_LEVEL.INFO);
             }
             else

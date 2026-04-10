@@ -29,6 +29,7 @@ namespace BinaryPacketServer_MultiPort
 
             if (IsResult)
             {
+                Console.WriteLine("🚀 서버1이 실행됩니다.");
                 DevLog.Write(string.Format("서버1 네트워크 시작"), LOG_LEVEL.INFO);
             }
             else
@@ -46,6 +47,7 @@ namespace BinaryPacketServer_MultiPort
 
             if (IsResult2)
             {
+                Console.WriteLine("🚀 서버2가 실행됩니다.");
                 DevLog.Write(string.Format("서버2 네트워크 시작"), LOG_LEVEL.INFO);
             }
             else
