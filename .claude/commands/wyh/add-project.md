@@ -111,10 +111,52 @@ echo "$STASH_RESULT" | grep -q "No local changes to stash" || git stash pop
 git push origin main
 ```
 
-**8. 완료 출력**
+**8. 모델 브랜치에 프로젝트 파일 배포** (GITHUB_URL이 있는 경우만)
+
+`.github/vibe-models.json`을 읽어 등록된 모든 모델의 `base_branch` 목록을 가져온다.
+
+각 모델 브랜치에 대해 아래를 순서대로 실행한다:
+
+```bash
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+WYHIL_ROOT=$(pwd)
+
+# 프로젝트 클론 (최초 1회)
+TEMP_DIR=$(mktemp -d)
+git clone {GITHUB_URL} "$TEMP_DIR/project" --depth=1
+rm -rf "$TEMP_DIR/project/.git"
+
+# 각 모델 브랜치별 배포
+MODEL_BRANCH={base_branch}  # 모델별로 반복
+WORKTREE_PATH="$TEMP_DIR/wt-$MODEL_BRANCH"
+
+git worktree add "$WORKTREE_PATH" "$MODEL_BRANCH"
+mkdir -p "$WORKTREE_PATH/{FOLDER}"
+cp -r "$TEMP_DIR/project/." "$WORKTREE_PATH/{FOLDER}/"
+
+cd "$WORKTREE_PATH"
+git add {FOLDER}/
+git commit -m "chore: init project {ALIAS} files [skip ci]"
+git push origin "$MODEL_BRANCH"
+
+cd "$WYHIL_ROOT"
+git worktree remove "$WORKTREE_PATH" --force
+```
+
+모든 모델 처리 후 임시 디렉터리 정리:
+```bash
+rm -rf "$TEMP_DIR"
+```
+
+성공 시 `✅ {MODEL_NAME} 브랜치 배포 완료`, 실패 시 `⚠️ {MODEL_NAME} 브랜치 배포 실패 (계속 진행)` 출력 후 다음 모델로 넘어간다.
+
+**9. 완료 출력**
 ```
 ✅ 프로젝트 등록 완료: {ALIAS} (폴더: {FOLDER}/)
 이슈 생성 시 /wyh:create-issue 에서 선택 가능합니다.
+
+모델 브랜치 배포 결과:
+{각 모델별 배포 결과 목록}
 ```
 
 ---
