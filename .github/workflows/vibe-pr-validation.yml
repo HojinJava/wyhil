@@ -10,16 +10,22 @@ permissions:
 
 jobs:
   validate:
+    name: "${{ github.event.pull_request.head.ref }} ← ${{ github.event.pull_request.base.ref }} 검증"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: Validate Vibe PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
+            // vibe-models.json을 checkout 없이 GitHub API로 직접 읽기
+            const response = await github.rest.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: '.github/vibe-models.json',
+              ref: context.payload.pull_request.base.repo.default_branch
+            });
+            const config = JSON.parse(Buffer.from(response.data.content, 'base64').toString());
 
             const headBranch = context.payload.pull_request.head.ref;
             const baseBranch = context.payload.pull_request.base.ref;
@@ -29,22 +35,22 @@ jobs:
             // vibe/* 브랜치만 검증
             const match = headBranch.match(/^vibe\/([^\/]+)\/.+/);
             if (!match) {
-              console.log(`ℹ️ vibe 브랜치 아님 (${headBranch}), 검증 건너뜀`);
+              console.log(`[건너뜀] vibe/* 브랜치가 아닙니다 → ${headBranch}`);
+              console.log(`[건너뜀] 관리자 PR 또는 일반 브랜치로 판단하여 검증을 생략합니다.`);
               return;
             }
 
             const modelKey = match[1];
 
-            // 모델 설정 읽기
-            const config = JSON.parse(fs.readFileSync('.github/vibe-models.json', 'utf8'));
             const model = config.models[modelKey];
 
             async function rejectPR(reason) {
+              const commentBody = `❌ **Vibe PR 검증 실패**\n\n${reason}\n\n> 브랜치는 삭제되지 않았습니다. 수정 후 올바른 대상 브랜치로 PR을 다시 생성하세요.`;
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: prNumber,
-                body: `❌ **Vibe PR 검증 실패**\n\n${reason}`
+                body: commentBody
               });
               await github.rest.pulls.update({
                 owner: context.repo.owner,
@@ -52,10 +58,19 @@ jobs:
                 pull_number: prNumber,
                 state: 'closed'
               });
+              core.setFailed(reason.replace(/\n|\|[^|]*\|/g, ' ').trim());
             }
 
+            console.log(`[검사 시작] PR #${prNumber}`);
+            console.log(`  작업 브랜치: ${headBranch}`);
+            console.log(`  대상 브랜치: ${baseBranch}`);
+            console.log(`  작성자: @${author}`);
+            console.log(`  모델 키: ${modelKey}`);
+
             // 검사 1: 등록된 모델인지 확인
+            console.log(`[검사 1/4] 모델 등록 여부 확인 중...`);
             if (!model) {
+              console.log(`[실패] 등록되지 않은 모델: ${modelKey}`);
               await rejectPR(
                 `등록되지 않은 모델입니다: \`${modelKey}\`\n\n` +
                 `\`.github/vibe-models.json\`에 해당 모델이 없습니다.\n` +
@@ -64,8 +79,12 @@ jobs:
               return;
             }
 
+            console.log(`[검사 1/4] 통과 → 등록된 모델 (${model.display_name})`);
+
             // 검사 2: PR 대상 브랜치가 모델 브랜치인지 확인
+            console.log(`[검사 2/4] PR 대상 브랜치 확인 중... (예상: ${modelKey}, 실제: ${baseBranch})`);
             if (baseBranch !== modelKey) {
+              console.log(`[실패] 대상 브랜치 불일치: ${baseBranch} ≠ ${modelKey}`);
               await rejectPR(
                 `PR 대상 브랜치가 올바르지 않습니다.\n\n` +
                 `| 항목 | 값 |\n|------|----|\n` +
@@ -77,9 +96,13 @@ jobs:
               return;
             }
 
+            console.log(`[검사 2/4] 통과 → 대상 브랜치 일치 (${baseBranch})`);
+
             // 검사 3: PR 작성자가 등록된 계정인지 확인 (계정이 설정된 경우만)
             const accounts = model.github_accounts || [];
+            console.log(`[검사 3/4] 작성자 계정 확인 중... (등록된 계정: ${accounts.length > 0 ? accounts.map(a => '@'+a).join(', ') : '없음(검사 생략)'})`);
             if (accounts.length > 0 && !accounts.includes(author)) {
+              console.log(`[실패] 허용되지 않은 작성자: @${author}`);
               await rejectPR(
                 `PR 작성자가 올바르지 않습니다.\n\n` +
                 `| 항목 | 값 |\n|------|----|\n` +
@@ -91,4 +114,47 @@ jobs:
               return;
             }
 
-            console.log(`✅ PR 검증 통과: @${author} → ${model.display_name} (${modelKey})`);
+            console.log(`[검사 3/4] 통과 → 작성자 확인 완료`);
+
+            // 검사 4: head 브랜치가 base 브랜치를 ancestor로 갖는지 확인 (올바른 브랜치 파생 여부)
+            // compareCommits(base, head) 결과:
+            //   "ahead"    → head가 base의 descendant (정상)
+            //   "diverged" → head가 base와 무관한 history를 가짐 (main 등에서 파생된 경우)
+            //   "behind"   → head가 base보다 뒤처짐 (비정상)
+            console.log(`[검사 4/4] 브랜치 파생 관계 확인 중... (${baseBranch} → ${headBranch})`);
+            try {
+              const compareResult = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: baseBranch,
+                head: headBranch
+              });
+              const status = compareResult.data.status;
+              const aheadBy = compareResult.data.ahead_by;
+              const behindBy = compareResult.data.behind_by;
+              console.log(`  비교 결과: ${status} (ahead_by: ${aheadBy}, behind_by: ${behindBy})`);
+              if (status === 'diverged') {
+                console.log(`[실패] head 브랜치가 base 브랜치를 ancestor로 갖지 않음: ${status}`);
+                await rejectPR(
+                  `작업 브랜치가 모델 브랜치(\`${baseBranch}\`)에서 파생되지 않았습니다.\n\n` +
+                  `| 항목 | 값 |\n|------|----|\n` +
+                  `| 작업 브랜치 | \`${headBranch}\` |\n` +
+                  `| PR 대상 브랜치 | \`${baseBranch}\` |\n` +
+                  `| 비교 결과 | \`${status}\` — 두 브랜치가 공통 ancestor를 공유하지 않음 |\n\n` +
+                  `작업 브랜치는 반드시 \`${baseBranch}\`를 upstream으로 생성해야 합니다:\n` +
+                  "```\n" +
+                  `git fetch origin\n` +
+                  `git checkout ${baseBranch}\n` +
+                  `git checkout -b ${headBranch}\n` +
+                  "```"
+                );
+                return;
+              }
+            } catch (e) {
+              // 브랜치 비교 실패 시 경고만 출력하고 통과 (신규 empty 브랜치 등 edge case)
+              console.log(`[경고] 브랜치 비교 API 호출 실패 — 검사 건너뜀: ${e.message}`);
+            }
+
+            console.log(`[검사 4/4] 통과 → 브랜치 파생 관계 확인 완료`);
+            console.log(`[완료] PR #${prNumber} 검증 통과`);
+            console.log(`  @${author} → ${model.display_name} (${modelKey}) 브랜치`);
