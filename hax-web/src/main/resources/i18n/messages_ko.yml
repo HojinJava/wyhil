@@ -1,0 +1,42 @@
+200ok:
+  desc: '성공'
+  status: '200' 
+userNotFound:
+  desc: '사용자 정보를 찾을 수 없습니다.'
+  status: '202'
+Unauthorized:
+  desc: 'Authentication Failure'
+  status: '401'
+UserP1_Exception:
+  status: '500'
+  desc: '{0}'
+UserP2_Exception:
+  status: '500'
+  desc: '{0} {1}'
+login:
+  desc: '성공'
+  status: '200' 
+logout:
+  desc: '성공'
+  status: '200'
+loginFail:
+  desc: '아이디가 없거나 비밀번호가 틀렸습니다.'
+  status: '398'
+userAlreadyExist:
+  desc: '이미 존재하는 사용자입니다.'
+  status: '312'
+AccessDenied:
+  desc: '권한이 없습니다.'
+  status: '403'
+noUploadFile:
+  desc: '업로드 할 수 없는 파일입니다.'
+  status: '397'
+fileSizeExceed:
+  desc: '업로드 파일 사이즈 초과'
+  status: '397'
+fileUploadFail:
+  desc: '파일 업로드 실패'
+  status: '397'
+
+  
+               

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.software.history.SoftwareHistoryDao">
+
+    <select id="findById" resultType="com.hnix.sd.work.software.history.dto.SoftwareHistoryDto">
+        SELECT
+            HIS_NO as hisNo,
+            CONTRACT_NO as contractNo,
+            HISTORY_TYPE_CD as historyTypeCd,
+            HISTORY_CONTENTS as historyContents,
+            REG_ID as regId,
+            REG_DT as regDt
+        FROM TS_WORK_SW_HISTORY
+        WHERE HISTORY_ID = #{historyId}
+    </select>
+
+    <select id="findByContractNo" resultType="com.hnix.sd.work.software.history.dto.SoftwareHistoryDto">
+        SELECT
+            HIS_NO as hisNo,
+            CONTRACT_NO as contractNo,
+            HISTORY_TYPE_CD as historyTypeCd,
+            HISTORY_CONTENTS as historyContents,
+            REG_ID as regId,
+            REG_DT as regDt
+        FROM TS_WORK_SW_HISTORY
+        WHERE CONTRACT_NO = #{contractNo}
+        AND USE_YN = 'Y'
+        ORDER BY HISTORY_SEQ ASC
+    </select>
+
+    <select id="countByContractNo" resultType="int">
+        SELECT COUNT(*)
+        FROM TS_WORK_SW_HISTORY
+        WHERE CONTRACT_NO = #{contractNo}
+    </select>
+
+    <insert id="insertHistory" parameterType="com.hnix.sd.work.software.history.dto.SoftwareHistoryDto">
+        INSERT INTO TS_WORK_SW_HISTORY (
+            CONTRACT_NO, HISTORY_TYPE_CD, HISTORY_CONTENTS, REG_ID, REG_DT, USE_YN, HISTORY_SEQ
+        ) VALUES (
+            #{contractNo}, #{historyTypeCd}, #{historyContents}, #{regId}, CURRENT_TIMESTAMP, 'Y', #{historySeq}
+        )
+    </insert>
+
+    <update id="updateHistory" parameterType="com.hnix.sd.work.software.history.dto.SoftwareHistoryDto">
+        UPDATE TS_WORK_SW_HISTORY
+        SET
+            HISTORY_CONTENTS = #{historyContents},
+            MOD_ID = #{modId},
+            MOD_DT = CURRENT_TIMESTAMP
+        WHERE HISTORY_ID = #{historyId}
+    </update>
+
+    <update id="updateHistoryUseYn">
+        UPDATE TS_WORK_SW_HISTORY
+        SET USE_YN = 'N'
+        WHERE HISTORY_ID = #{historyId}
+    </update>
+
+    <select id="findSoftwareHistoryByPagination" resultType="com.hnix.sd.work.software.history.dto.HistoryGridInfoDto">
+        <!-- 기존 QueryDSL 로직을 SQL로 이식 -->
+        SELECT
+            h.HISTORY_ID as historyId,
+            h.CONTRACT_NO as contractNo,
+            c.CONTRACT_YEAR as contractYear,
+            c.SUB_CD as subCd,
+            s.SW_NM as swName,
+            cust.COMPANY_NM as customerCompanyNm,
+            cust.DEPARTMENT_NM as customerDepartmentNm,
+            cust.MANAGE_NM as customerManageNm,
+            c.DEPT_CD as customerDeptCd,
+            part_dept.COMPANY_NM as partnerCompanyNm,
+            p.COMP_CODE as partnerDeptCd,
+            h.HISTORY_SEQ as historySeq,
+            h.HISTORY_TYPE_CD as historyTypeCd,
+            h.HISTORY_CONTENTS as historyContents
+        FROM TS_WORK_SW_HISTORY h
+        INNER JOIN TS_WORK_CONTRACT c ON h.CONTRACT_NO = c.CONTRACT_NO
+        INNER JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CODE
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN TS_COMMON_DEPT cust ON c.DEPT_CD = cust.ORIGIN_CD
+        LEFT JOIN TS_COMMON_DEPT part_dept ON p.COMP_CODE = part_dept.ORIGIN_CD
+        <where>
+            <if test="contractYear != null and contractYear != ''">
+                AND c.CONTRACT_YEAR = #{contractYear}
+            </if>
+            AND h.USE_YN = 'Y'
+            <if test="swName != null and swName != ''">
+                AND s.SW_NM LIKE '%' || #{swName} || '%'
+            </if>
+            <!-- 추가 검색 조건 생략 (필요 시 확장) -->
+        </where>
+        ORDER BY h.REG_DT DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+
+    <select id="countSoftwareHistoryByPagination" resultType="long">
+        SELECT COUNT(*)
+        FROM TS_WORK_SW_HISTORY h
+        INNER JOIN TS_WORK_CONTRACT c ON h.CONTRACT_NO = c.CONTRACT_NO
+        INNER JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CODE
+        INNER JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        <where>
+            <if test="contractYear != null and contractYear != ''">
+                AND c.CONTRACT_YEAR = #{contractYear}
+            </if>
+            AND h.USE_YN = 'Y'
+            <if test="swName != null and swName != ''">
+                AND s.SW_NM LIKE '%' || #{swName} || '%'
+            </if>
+        </where>
+    </select>
+
+</mapper>

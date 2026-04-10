@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.common.file.dao.FileDao">
+
+    <select id="findAllByFileId" resultType="com.hnix.sd.common.file.dto.FileDto">
+        SELECT *
+        FROM TC_FILE
+        WHERE FILE_ID = #{fileId}
+          AND DEL_YN = 'N'
+    </select>
+
+    <select id="findByFileUuid" resultType="com.hnix.sd.common.file.dto.FileDto">
+        SELECT *
+        FROM TC_FILE
+        WHERE FILE_UUID = #{fileUuid}
+          AND DEL_YN = 'N'
+    </select>
+
+    <insert id="insertFile">
+        INSERT INTO TC_FILE (
+            FILE_UUID, FILE_ID, FILE_NM, FILE_PATH, FILE_EXT, FILE_SIZE, FILE_CONT_TYPE, DEL_YN, REG_ID, REG_DT
+        ) VALUES (
+            #{fileUuid}, #{fileId}, #{fileNm}, #{filePath}, #{fileExt}, #{fileSize}, #{fileContType}, 'N', #{regId}, NOW()
+        )
+    </insert>
+
+    <update id="deleteByFileUuid">
+        UPDATE TC_FILE
+        SET DEL_YN = 'Y',
+            MOD_DT = NOW()
+        WHERE FILE_UUID = #{fileUuid}
+    </update>
+
+    <update id="deleteByFileId">
+        UPDATE TC_FILE
+        SET DEL_YN = 'Y',
+            MOD_DT = NOW()
+        WHERE FILE_ID = #{fileId}
+    </update>
+
+</mapper>
