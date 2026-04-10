@@ -1,0 +1,21 @@
+{
+  "projects": {
+    "mall": {
+      "alias": "mall",
+      "folder": "mall"
+    },
+    "socket": {
+      "alias": "socket",
+      "folder": "supersocket"
+    },
+    "card": {
+      "alias": "card",
+      "folder": "cardstackview"
+    },
+    "hax-web": {
+      "alias": "hax-web",
+      "folder": "hax-web",
+      "github_url": "https://github.com/myoungsuboh/hax-web"
+    }
+  }
+}
