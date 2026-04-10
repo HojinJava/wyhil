@@ -8,16 +8,13 @@ permissions:
   pull-requests: write
   contents: read
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   validate:
     name: "${{ github.event.pull_request.head.ref }} ← ${{ github.event.pull_request.base.ref }} 검증"
     runs-on: ubuntu-latest
     steps:
       - name: Validate Vibe PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
