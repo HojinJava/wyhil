@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.work.software.contract.mapper.ContractMapper">
+
+    <resultMap id="ContractResultMap" type="com.hnix.sd.work.software.contract.dto.ContractDto">
+        <id property="contractNo" column="CONTRACT_NO"/>
+        <result property="subCd" column="SUB_CD"/>
+        <result property="deptCd" column="DEPT_CD"/>
+        <result property="contractYear" column="CONTRACT_YEAR"/>
+        <result property="contractStartDate" column="CONTRACT_ST_DT"/>
+        <result property="contractEndDate" column="CONTRACT_ED_DT"/>
+        <result property="remark" column="REMARK"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="modId" column="MOD_ID"/>
+        <result property="modDt" column="MOD_DT"/>
+        <result property="deleteYn" column="DELETE_YN"/>
+    </resultMap>
+
+    <select id="findByContractNo" resultMap="ContractResultMap">
+        SELECT * FROM TS_WORK_SW_CONTRACT WHERE CONTRACT_NO = #{contractNo}
+    </select>
+
+    <select id="findAllByContractNos" resultMap="ContractResultMap">
+        SELECT * FROM TS_WORK_SW_CONTRACT WHERE CONTRACT_NO IN
+        <foreach collection="contractNos" item="no" open="(" separator="," close=")">
+            #{no}
+        </foreach>
+    </select>
+
+    <select id="findByContractNoStartingWith" resultType="string">
+        SELECT CONTRACT_NO FROM TS_WORK_SW_CONTRACT WHERE CONTRACT_NO LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <update id="updateContractDeleteYn">
+        UPDATE TS_WORK_SW_CONTRACT SET DELETE_YN = 'Y' WHERE CONTRACT_NO = #{contractNo}
+    </update>
+
+    <update id="updateMultiContractDeleteYn">
+        UPDATE TS_WORK_SW_CONTRACT SET DELETE_YN = 'Y' WHERE CONTRACT_NO IN
+        <foreach collection="contractIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <insert id="insertContract">
+        INSERT INTO TS_WORK_SW_CONTRACT (
+            CONTRACT_NO, SUB_CD, DEPT_CD, CONTRACT_YEAR, CONTRACT_ST_DT, CONTRACT_ED_DT, 
+            REMARK, DELETE_YN, REG_ID, REG_DT
+        ) VALUES (
+            #{contractNo}, #{subCd}, #{deptCd}, #{contractYear}, #{contractStartDate}, #{contractEndDate},
+            #{remark}, #{deleteYn}, #{regId}, NOW()
+        )
+    </insert>
+
+    <update id="updateContract">
+        UPDATE TS_WORK_SW_CONTRACT
+           SET DEPT_CD = #{deptCd},
+               CONTRACT_ST_DT = #{contractStartDate},
+               CONTRACT_ED_DT = #{contractEndDate},
+               REMARK = #{remark},
+               DELETE_YN = #{deleteYn},
+               MOD_ID = #{modId},
+               MOD_DT = NOW()
+         WHERE CONTRACT_NO = #{contractNo}
+    </update>
+
+    <!-- ContractGridService related join query SQL -->
+    <sql id="contractGridBase">
+        SELECT
+            c.CONTRACT_YEAR as contractYear,
+            c.CONTRACT_NO as contractNo,
+            c.SUB_CD as subCd,
+            c.DEPT_CD as deptCd,
+            COALESCE(cs.MGR_DEPT_COMP_NM, cust.COMPANY_NM) as customerCompanyNm,
+            cust.COMPANY_CD as customerCompanyCd,
+            COALESCE(cs.MGR_DEPT_BIZ_NM, cust.DEPARTMENT_NM) as customerDepartmentNm,
+            cust.DEPARTMENT_CD as customerDepartmentCd,
+            COALESCE(cs.MGR_DEPT_NM, cust.MANAGE_NM) as customerManageNm,
+            c.DEPT_CD as customerManageCd,
+            COALESCE(cs.PARTNER_COMP_NM, part.COMPANY_NM) as partnerCompanyNm,
+            COALESCE(cs.PARTNER_COMP_CD, p.COMP_CD) as partnerCompanyCd,
+            COALESCE(cs.SW_NM, s.SW_NM) as swName,
+            s.SW_CD as swCode,
+            p.PARTNER_CONTRACT_CD as partnerContractCd,
+            h.HIS_CONTENTS as historyContents,
+            c.CONTRACT_ST_DT as contractStDt,
+            c.CONTRACT_ED_DT as contractEdDt,
+            c.REG_ID as regId,
+            c.REG_DT as regDt
+        FROM TS_WORK_SW_CONTRACT c
+        LEFT JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CD
+        LEFT JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON c.DEPT_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE part ON p.COMP_CD = part.ORIGIN_CD
+        LEFT JOIN TS_MA_HISTORY h ON c.CONTRACT_NO = h.CONTRACT_NO
+        LEFT JOIN TS_WORK_SW_CONTRACT_SUB cs ON c.CONTRACT_NO = cs.CONTRACT_NO
+        WHERE c.DELETE_YN != 'Y'
+    </sql>
+
+    <select id="findContractPagination" resultType="com.hnix.sd.work.software.contract.dto.ContractGridInfoDto">
+        <include refid="contractGridBase"/>
+        <if test="contractYear != null and contractYear != ''">
+            AND c.CONTRACT_YEAR = #{contractYear}
+        </if>
+        <if test="customerCode != null and customerCode != ''">
+            AND cust.COMPANY_CD = #{customerCode}
+        </if>
+        <if test="manageDeptCode != null and manageDeptCode != ''">
+            AND cust.MANAGE_CD = #{manageDeptCode}
+        </if>
+        <if test="partnerCode != null and partnerCode != ''">
+            AND part.COMPANY_CD = #{partnerCode}
+        </if>
+        <if test="swNm != null and swNm != ''">
+            AND s.SW_NM LIKE CONCAT('%', #{swNm}, '%')
+        </if>
+        <if test="subCode != null and subCode != ''">
+            AND c.SUB_CD LIKE CONCAT('%', #{subCode}, '%')
+        </if>
+        <if test="partnerContractCd != null and partnerContractCd != ''">
+            AND p.PARTNER_CONTRACT_CD = #{partnerContractCd}
+        </if>
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                ORDER BY ${sortBy}
+            </when>
+            <otherwise>
+                ORDER BY c.REG_DT DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countContractPagination" resultType="long">
+        SELECT COUNT(*)
+        FROM TS_WORK_SW_CONTRACT c
+        LEFT JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CD
+        LEFT JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON c.DEPT_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE part ON p.COMP_CD = part.ORIGIN_CD
+        WHERE c.DELETE_YN != 'Y'
+        <if test="contractYear != null and contractYear != ''">
+            AND c.CONTRACT_YEAR = #{contractYear}
+        </if>
+        <if test="customerCode != null and customerCode != ''">
+            AND cust.COMPANY_CD = #{customerCode}
+        </if>
+        <if test="manageDeptCode != null and manageDeptCode != ''">
+            AND cust.MANAGE_CD = #{manageDeptCode}
+        </if>
+        <if test="partnerCode != null and partnerCode != ''">
+            AND part.COMPANY_CD = #{partnerCode}
+        </if>
+        <if test="swNm != null and swNm != ''">
+            AND s.SW_NM LIKE CONCAT('%', #{swNm}, '%')
+        </if>
+    </select>
+
+    <select id="findContractDialogGrid" resultType="com.hnix.sd.work.software.contract.dto.ContractGridInfoDto">
+        <include refid="contractGridBase"/>
+        <if test="contractYear != null and contractYear != ''">
+            AND c.CONTRACT_YEAR = #{contractYear}
+        </if>
+        <if test="customerName != null and customerName != ''">
+            AND cust.COMPANY_NM LIKE CONCAT('%', #{customerName}, '%')
+        </if>
+        <if test="departmentName != null and departmentName != ''">
+            AND cust.MANAGE_NM LIKE CONCAT('%', #{departmentName}, '%')
+        </if>
+        <if test="partnerName != null and partnerName != ''">
+            AND part.COMPANY_NM LIKE CONCAT('%', #{partnerName}, '%')
+        </if>
+        <if test="softwareName != null and softwareName != ''">
+            AND s.SW_NM LIKE CONCAT('%', #{softwareName}, '%')
+        </if>
+        <if test="subCode != null and subCode != ''">
+            AND c.SUB_CD LIKE CONCAT('%', #{subCode}, '%')
+        </if>
+        <if test="!isAdmin">
+            AND part.COMPANY_CD = #{loginUserCompanyCd}
+        </if>
+        ORDER BY c.REG_DT DESC
+    </select>
+
+    <select id="findContractDetailByContractNo" resultType="com.hnix.sd.work.software.contract.dto.ContractDetailDto">
+        SELECT
+            c.CONTRACT_YEAR as contractYear,
+            c.CONTRACT_NO as contractNo,
+            c.SUB_CD as subCd,
+            COALESCE(cs.MGR_DEPT_COMP_NM, cust.COMPANY_NM) as customerCompanyNm,
+            cust.COMPANY_CD as customerCompanyCd,
+            COALESCE(cs.MGR_DEPT_BIZ_NM, cust.DEPARTMENT_NM) as customerDepartmentNm,
+            cust.DEPARTMENT_CD as customerDepartmentCd,
+            COALESCE(cs.MGR_DEPT_NM, cust.MANAGE_NM) as customerManageNm,
+            c.DEPT_CD as customerManageCd,
+            COALESCE(cs.PARTNER_COMP_NM, part.COMPANY_NM) as partnerCompanyNm,
+            COALESCE(cs.PARTNER_COMP_CD, p.COMP_CD) as partnerCompanyCd,
+            COALESCE(cs.SW_NM, s.SW_NM) as swName,
+            s.SW_CD as swCode,
+            c.REMARK as remark,
+            p.PARTNER_CONTRACT_CD as partnerContractCd,
+            c.CONTRACT_ST_DT as contractStDt,
+            c.CONTRACT_ED_DT as contractEdDt,
+            c.REG_ID as regId,
+            c.REG_DT as regDt
+        FROM TS_WORK_SW_CONTRACT c
+        LEFT JOIN TS_WORK_SW_PARTNER p ON c.SUB_CD = p.SUB_CD
+        LEFT JOIN TS_WORK_SW s ON p.SW_CD = s.SW_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cust ON c.DEPT_CD = cust.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE part ON p.COMP_CD = part.ORIGIN_CD
+        LEFT JOIN TS_WORK_SW_CONTRACT_SUB cs ON c.CONTRACT_NO = cs.CONTRACT_NO
+        WHERE c.CONTRACT_NO = #{contractNo}
+          AND c.DELETE_YN != 'Y'
+    </select>
+
+</mapper>
