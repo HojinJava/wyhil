@@ -7,6 +7,32 @@
 
 ---
 
+## 사전 준비
+
+관리자 커맨드(`/wyh:*`)는 내부적으로 GitHub CLI(`gh`)를 사용합니다.
+
+```bash
+# macOS
+brew install gh
+
+# Windows (winget)
+winget install --id GitHub.cli
+
+# Windows (scoop)
+scoop install gh
+
+# Linux (apt)
+sudo apt install gh
+```
+
+설치 후 로그인 (최초 1회):
+
+```bash
+gh auth login
+```
+
+---
+
 ## 흐름도
 
 ![vibe-eval 워크플로우](.claude/vibe_eval_workflow.svg)
@@ -129,32 +155,6 @@ combined:   mall-codebase-analysis-1
 브랜치:  vibe/claude/mall-codebase-analysis-1
 PR 제목: [Claude] mall/codebase-analysis #1
 세션:    .claude/vibe-sessions/mall-codebase-analysis-1/claude.md
-```
-
----
-
-## 사전 준비
-
-관리자 커맨드(`/wyh:*`)는 내부적으로 GitHub CLI(`gh`)를 사용합니다.
-
-```bash
-# macOS
-brew install gh
-
-# Windows (winget)
-winget install --id GitHub.cli
-
-# Windows (scoop)
-scoop install gh
-
-# Linux (apt)
-sudo apt install gh
-```
-
-설치 후 로그인 (최초 1회):
-
-```bash
-gh auth login
 ```
 
 ---
