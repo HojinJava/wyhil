@@ -2,8 +2,8 @@
 
 ## 지금 바로 실행
 
-git fetch origin {모델명}
-git checkout -b vibe/{모델명}/mall-test_3-36 origin/{모델명}
+git fetch origin claude
+git checkout -b vibe/claude/mall-test_3-36 origin/claude
 
 위 명령 실행 후 mall 폴더 안에서 작업을 진행한다.
 
@@ -14,7 +14,7 @@ git checkout -b vibe/{모델명}/mall-test_3-36 origin/{모델명}
 ## 반드시 지켜야 할 규칙
 
 작업 완료 후 모든 커밋을 1개로 squash한다.
-squash 후 위에서 checkout한 {모델명} 브랜치를 대상으로 PR을 생성한다.
+squash 후 위에서 checkout한 claude 브랜치를 대상으로 PR을 생성한다.
 PR 본문에 `References #36` 를 반드시 포함한다.
 PR에 본인 모델 라벨을 추가한다.
 
@@ -41,15 +41,15 @@ PR 생성이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
 ```
 git mv task/mall/issue-36.md task_done/mall/issue-36.md
 git commit -m "chore: move issue-36 task to task_done"
-git push origin vibe/{모델명}/mall-test_3-36
+git push origin vibe/claude/mall-test_3-36
 ```
 
 **2. 모델 베이스 브랜치에서도 이동**
 
 ```
-git checkout {모델명}
-git pull origin {모델명}
+git checkout claude
+git pull origin claude
 git mv task/mall/issue-36.md task_done/mall/issue-36.md
 git commit -m "chore: move issue-36 task to task_done"
-git push origin {모델명}
+git push origin claude
 ```
