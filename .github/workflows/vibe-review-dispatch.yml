@@ -151,7 +151,9 @@ jobs:
                 .replace(/{PR_NUMBER}/g, String(prNumber))
                 .replace(/{PR_AUTHOR_MODEL}/g, prAuthorDisplayName)
                 .replace(/{OWNER}/g, owner)
-                .replace(/{REPO}/g, repo);
+                .replace(/{REPO}/g, repo)
+                .replace(/{MODEL}/g, model.base_branch)
+                .replace(/{TARGET_DIR}/g, targetDir);
 
               const encodedContent = Buffer.from(content).toString('base64');
 
