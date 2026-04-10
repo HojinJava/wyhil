@@ -115,7 +115,7 @@ jobs:
                 try {
                   await github.rest.repos.getContent({
                     owner, repo,
-                    path: `${proj.folder}/task/issue-${issueNumber}.md`,
+                    path: `task/${proj.folder}/issue-${issueNumber}.md`,
                     ref: model.base_branch
                   });
                   foundTaskFile = true;
@@ -144,14 +144,16 @@ jobs:
             let pushFailed = false;
 
             for (const { modelKey, model, targetDir } of participatingModels) {
-              const filePath = `${targetDir}/task/review-${issueNumber}.md`;
+              const filePath = `task/${targetDir}/review-${issueNumber}.md`;
               const content = template
                 .replace(/{TITLE}/g, issueTitle)
                 .replace(/{ISSUE_NUMBER}/g, issueNumber)
                 .replace(/{PR_NUMBER}/g, String(prNumber))
                 .replace(/{PR_AUTHOR_MODEL}/g, prAuthorDisplayName)
                 .replace(/{OWNER}/g, owner)
-                .replace(/{REPO}/g, repo);
+                .replace(/{REPO}/g, repo)
+                .replace(/{MODEL}/g, model.base_branch)
+                .replace(/{TARGET_DIR}/g, targetDir);
 
               const encodedContent = Buffer.from(content).toString('base64');
 
