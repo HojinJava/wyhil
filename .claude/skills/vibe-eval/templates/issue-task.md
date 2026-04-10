@@ -39,6 +39,7 @@ PR 생성이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
 **1. 현재 작업 브랜치에서 이동**
 
 ```
+mkdir -p task_done/{TARGET_DIR}
 git mv task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md task_done/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md
 git commit -m "chore: move issue-{ISSUE_NUMBER} task to task_done"
 git push origin vibe/{MODEL}/{SLUG}-{ISSUE_NUMBER}
@@ -49,6 +50,7 @@ git push origin vibe/{MODEL}/{SLUG}-{ISSUE_NUMBER}
 ```
 git checkout {MODEL}
 git pull origin {MODEL}
+mkdir -p task_done/{TARGET_DIR}
 git mv task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md task_done/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md
 git commit -m "chore: move issue-{ISSUE_NUMBER} task to task_done"
 git push origin {MODEL}

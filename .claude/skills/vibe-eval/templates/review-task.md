@@ -38,6 +38,7 @@ gh pr view {PR_NUMBER} --repo {OWNER}/{REPO}
 PR 댓글 등록이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
 
 ```
+mkdir -p task_done/{TARGET_DIR}
 git mv task/{TARGET_DIR}/review-{ISSUE_NUMBER}.md task_done/{TARGET_DIR}/review-{ISSUE_NUMBER}.md
 git commit -m "chore: move review-{ISSUE_NUMBER} task to task_done"
 git push origin {MODEL}
