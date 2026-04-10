@@ -94,6 +94,7 @@ e. main 브랜치에 커밋 및 push:
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "feat: add vibe model <key> (<display_name>)"
+git pull --rebase origin main
 git push origin main
 ```
 
@@ -149,6 +150,7 @@ d. main 브랜치에 커밋 및 push:
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "feat: remove vibe model <key> (<display_name>)"
+git pull --rebase origin main
 git push origin main
 ```
 

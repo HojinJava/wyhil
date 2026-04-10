@@ -77,6 +77,7 @@ gh api "repos/$REPO/collaborators" --jq '.[].login'
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "chore: map @<github-user> to model <key>"
+git pull --rebase origin main
 git push origin main
 ```
 
@@ -113,6 +114,7 @@ git push origin main
 ```bash
 git add .github/vibe-models.json README.md
 git commit -m "chore: unmap @<github-user> from model <key>"
+git pull --rebase origin main
 git push origin main
 ```
 
