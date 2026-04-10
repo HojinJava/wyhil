@@ -26,7 +26,7 @@
     },
     "codex": {
       "display_name": "Codex",
-      "github_accounts": [],
+      "github_accounts": ["ChaeJ"],
       "label": "model:Codex",
       "base_branch": "codex"
     }

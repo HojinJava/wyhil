@@ -22,7 +22,7 @@
 | Wyhill | `wyhill` | - |
 | Wyhill+지침서 | `wyhill-guide` | @HojinJava |
 | 안티그래비티 | `antigravity` | @myoungsuboh, @SeJin4019, @HojinJava |
-| Codex | `codex` | - |
+| Codex | `codex` | @ChaeJ |
 <!-- VIBE-MODELS-END -->
 
 ---
