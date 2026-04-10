@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hnix.sd.common.user.dao.UserEmailDao">
+
+    <select id="findByUserIdEntity" resultType="com.hnix.sd.common.user.dto.UserEmailDto">
+        SELECT *
+        FROM TC_USER_EMAIL
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="findByIdxRangeAndSendYnN" resultType="com.hnix.sd.common.user.dto.UserEmailDto">
+        SELECT *
+        FROM TC_USER_EMAIL
+        WHERE IDX BETWEEN #{fromIdx} AND #{toIdx}
+          AND SEND_YN = 'N'
+    </select>
+
+    <insert id="insertUserEmail">
+        INSERT INTO TC_USER_EMAIL (
+            USER_ID, IDX, USER_NM, USER_EMAIL, SEND_YN, SEND_DT, COMPANY_CD
+        ) VALUES (
+            #{userId}, #{idx}, #{userNm}, #{userEmail}, #{sendYn}, #{sendDt}, #{companyCd}
+        )
+    </insert>
+
+    <update id="updateUserEmail">
+        UPDATE TC_USER_EMAIL
+        SET IDX = #{idx},
+            USER_NM = #{userNm},
+            USER_EMAIL = #{userEmail},
+            SEND_YN = #{sendYn},
+            SEND_DT = #{sendDt},
+            COMPANY_CD = #{companyCd}
+        WHERE USER_ID = #{userId}
+    </update>
+
+</mapper>

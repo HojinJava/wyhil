@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.common.auth.user.dao.UserAuthDao">
+
+    <resultMap id="authUserInfoResultMap" type="com.hnix.sd.common.auth.user.dto.AuthUserInfoDto">
+        <result column="GROUP_CD" property="groupCd"/>
+        <result column="USER_TYPE_CD" property="userTypeCd"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="USER_NM" property="userNm"/>
+        <result column="USER_DEPT_NM" property="userDeptNm"/>
+        <result column="DEPT_CD" property="deptCd"/>
+        <result column="DEPT_NM" property="deptNm"/>
+        <result column="COMPANY" property="company"/>
+    </resultMap>
+
+    <resultMap id="userAuthResultMap" type="com.hnix.sd.common.auth.user.dto.UserAuthDto">
+        <id column="USER_ID" property="userId"/>
+        <id column="GROUP_CD" property="groupCd"/>
+        <result column="USER_TYPE_CD" property="userTypeCd"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="MOD_ID" property="modId"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="MOD_DT" property="modDt"/>
+    </resultMap>
+
+    <select id="findByGroupCdWithDept" resultMap="authUserInfoResultMap">
+        SELECT ua.GROUP_CD, ua.USER_TYPE_CD, d.DEPT_CD, d.DEPT_NM, func_find_company(d.DEPT_CD) AS COMPANY
+        FROM TC_AUTH_GROUP_USER ua
+        INNER JOIN TS_DEPT d ON d.DEPT_CD = ua.USER_ID
+        WHERE ua.GROUP_CD = #{groupCd} AND ua.USER_TYPE_CD &lt;&gt; 'U'
+    </select>
+
+    <select id="findByGroupCdWithUser" resultMap="authUserInfoResultMap">
+        SELECT ua.GROUP_CD, ua.USER_TYPE_CD, u.USER_ID, u.USER_NM, u.USER_DEPT_NM, d.DEPT_CD, d.DEPT_NM, func_find_company(d.DEPT_CD) AS COMPANY
+        FROM TC_AUTH_GROUP_USER ua
+        INNER JOIN TC_USER u ON u.USER_ID = ua.USER_ID
+        INNER JOIN TS_DEPT d ON d.DEPT_CD = u.DEPT_CD
+        WHERE ua.GROUP_CD = #{groupCd} AND ua.USER_TYPE_CD = 'U'
+    </select>
+
+    <select id="findByGroupCdWithUserId" resultType="java.lang.String">
+        SELECT GROUP_CD FROM TC_AUTH_GROUP_USER WHERE USER_ID = #{userId}
+    </select>
+
+    <delete id="deleteByUserIdAndGroupCdAndUserTypeCd">
+        DELETE FROM TC_AUTH_GROUP_USER
+        WHERE USER_ID = #{userId} AND GROUP_CD = #{groupCd} AND USER_TYPE_CD = #{userTypeCd}
+    </delete>
+
+    <insert id="insertUserAuth" parameterType="com.hnix.sd.common.auth.user.dto.UserAuthDto">
+        INSERT INTO TC_AUTH_GROUP_USER (
+            USER_ID, GROUP_CD, USER_TYPE_CD, REG_ID, MOD_ID, REG_DT, MOD_DT
+        ) VALUES (
+            #{userId}, #{groupCd}, #{userTypeCd}, #{regId}, #{modId}, NOW(), NOW()
+        )
+    </insert>
+
+    <insert id="insertUserAuthList">
+        INSERT INTO TC_AUTH_GROUP_USER (
+            USER_ID, GROUP_CD, USER_TYPE_CD, REG_ID, MOD_ID, REG_DT, MOD_DT
+        ) VALUES
+        <foreach item="item" collection="userAuths" separator=",">
+            (#{item.userId}, #{item.groupCd}, #{item.userTypeCd}, #{item.regId}, #{item.modId}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+</mapper>

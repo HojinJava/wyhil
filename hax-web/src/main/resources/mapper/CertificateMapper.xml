@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.registration.certificate.CertificateDao">
+
+    <resultMap id="certificateResultMap" type="com.hnix.sd.work.registration.certificate.dto.CertificateDto">
+        <id column="SERVICE_NO" property="serviceNo"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="CERT_DT" property="certDt"/>
+        <result column="CERT_CD" property="certCd"/>
+        <result column="CERT_COMMENT" property="certComment"/>
+        <result column="CERT_TOKEN" property="certToken"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="MOD_ID" property="modId"/>
+        <result column="MOD_DT" property="modDt"/>
+    </resultMap>
+
+    <select id="findById" resultMap="certificateResultMap">
+        SELECT * FROM TS_WORK_CERT WHERE SERVICE_NO = #{id}
+    </select>
+
+    <insert id="save" parameterType="com.hnix.sd.work.registration.certificate.dto.CertificateDto">
+        INSERT INTO TS_WORK_CERT (
+            SERVICE_NO, USER_ID, CERT_DT, CERT_CD, CERT_COMMENT, CERT_TOKEN, REG_ID, REG_DT, MOD_ID, MOD_DT
+        ) VALUES (
+            #{serviceNo}, #{userId}, #{certDt}, #{certCd}, #{certComment}, #{certToken}, #{regId}, NOW(), #{modId}, NOW()
+        )
+    </insert>
+
+    <select id="findCertificateByServiceNo" resultType="java.lang.Object">
+        SELECT c.SERVICE_NO, u.USER_ID, u.USER_NM, c.CERT_DT, c.CERT_CD,
+               d.COMPANY_NM, d.DEPARTMENT_NM, d.MANAGE_NM, d.ORIGIN_CD,
+               c.CERT_COMMENT, c.REG_ID
+        FROM TS_WORK_CERT c
+        LEFT JOIN TC_USER u ON c.USER_ID = u.USER_ID
+        LEFT JOIN TS_DEPT_STRUCTURE d ON u.DEPT_CD = d.ORIGIN_CD
+        WHERE c.SERVICE_NO = #{serviceNo}
+    </select>
+
+</mapper>

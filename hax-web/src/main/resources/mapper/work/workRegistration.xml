@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnix.sd.work.registration.record.dao.WorkRegistrationDao">
+
+    <sql id="workRegistrationBase">
+        SELECT
+            w.SERVICE_NO as serviceNo,
+            w.CONTRACT_NO as contractNo,
+            w.SUB_CD as subCd,
+            w.REQ_DT as reqDt,
+            w.REQ_COMP_CD as reqCompCd,
+            w.REQ_USER_ID as reqUserId,
+            w.STATUS_CD as statusCd,
+            w.PROC_DT as procDt,
+            w.PROC_USER_NM as procUserNm,
+            w.PROC_SUPPORT_CD as procSupportCd,
+            w.PROC_RESULT_CD as procResultCd,
+            w.REG_ID as regId,
+            w.REQ_CONTENTS as reqContents,
+            w.PROC_CONTENTS as procContents,
+            
+            (SELECT CODE_TEXT FROM TC_COMMON_CODE WHERE CODE_CD = w.PROC_SUPPORT_CD) as procSupportNm,
+            (SELECT CODE_TEXT FROM TC_COMMON_CODE WHERE CODE_CD = w.PROC_RESULT_CD) as procResultNm,
+            (SELECT CODE_TEXT FROM TC_COMMON_CODE WHERE CODE_CD = w.STATUS_CD) as statusNm,
+            
+            p.SW_CODE as swCd,
+            s.SW_NAME as swNm,
+            c.CODE_TEXT as serviceCdNm,
+            cd.COMPANY_NM as customerCompanyNm,
+            cd.DEPARTMENT_NM as customerDepartmentNm,
+            cd.MANAGE_NM as customerManageNm,
+            ru.USER_NM as reqUserNm,
+            ru.USER_DEPT_NM as userDeptNm,
+            rd.DEPARTMENT_NM as reqUserDepartmentNm,
+            rd.COMPANY_NM as reqUserCompanyNm,
+            pd.COMPANY_NM as procCompanyNm,
+            cert.CERT_CD as certCd,
+            cert.CERT_DT as certDt,
+            COALESCE(sv.POINT_DIS_YN, 'N') as pointDisYn,
+            ptd.COMPANY_NM as partnerCompanyNm
+        FROM TS_WORK_HISTORY w
+        INNER JOIN TS_WORK_SW_PARTNER p ON w.SUB_CD = p.SUB_CODE
+        INNER JOIN TS_WORK_SW s ON p.SW_CODE = s.SW_CODE
+        INNER JOIN TC_USER ru ON w.REQ_USER_ID = ru.USER_ID
+        LEFT JOIN TS_WORK_SURVEY sv ON sv.SERVICE_NO = w.SERVICE_NO
+        LEFT JOIN TC_COMMON_CODE c ON c.CODE_CD = w.SERVICE_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cd ON w.REQ_COMP_CD = cd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE rd ON ru.DEPT_CD = rd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE pd ON w.PROC_DEPT_CD = pd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE ptd ON p.COMP_CODE = ptd.ORIGIN_CD
+        LEFT JOIN TS_WORK_CERT cert ON w.SERVICE_NO = cert.SERVICE_NO
+    </sql>
+
+    <sql id="workRegistrationSearch">
+        <where>
+            <if test="startDate != null and endDate != null">
+                AND w.REQ_DT BETWEEN #{startDate} AND #{endDate}
+            </if>
+            <if test="satisfied == 'Y'">
+                AND sv.POINT_DIS_YN = 'Y'
+            </if>
+            <if test="customerCd != null and customerCd != ''">
+                AND cd.COMPANY_CD = #{customerCd}
+            </if>
+            <if test="departmentCd != null and departmentCd != ''">
+                AND (cd.MANAGE_CD = #{departmentCd} OR cd.PRNT_DEPT_CD = #{departmentCd})
+            </if>
+            <if test="partnerCd != null and partnerCd != ''">
+                AND ptd.COMPANY_CD = #{partnerCd}
+            </if>
+            <if test="softwareName != null and softwareName != ''">
+                AND s.SW_NAME LIKE CONCAT('%', #{softwareName}, '%')
+            </if>
+            <if test="subCode != null and subCode != ''">
+                AND p.SUB_CODE LIKE CONCAT('%', #{subCode}, '%')
+            </if>
+            
+            <!-- Role based filtering -->
+            <choose>
+                <when test="isAdmin or isManage">
+                    <!-- No additional filter -->
+                </when>
+                <when test="isDeptManage">
+                    AND pd.COMPANY_CD = #{loginUserCompanyCd}
+                </when>
+                <otherwise>
+                    AND w.REG_ID = #{loginUserId}
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+
+    <select id="findWorkRegistrationPagination" resultType="com.hnix.sd.work.registration.record.dto.WorkRegisterGridDto">
+        <include refid="workRegistrationBase"/>
+        <include refid="workRegistrationSearch"/>
+        GROUP BY w.SERVICE_NO
+        <choose>
+            <when test="criteria != null and criteria != ''">
+                ORDER BY ${criteria} ${sort}
+            </when>
+            <otherwise>
+                ORDER BY w.REG_DT DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countWorkRegistrationPagination" resultType="long">
+        SELECT COUNT(DISTINCT w.SERVICE_NO)
+        FROM TS_WORK_HISTORY w
+        INNER JOIN TS_WORK_SW_PARTNER p ON w.SUB_CD = p.SUB_CODE
+        INNER JOIN TS_WORK_SW s ON p.SW_CODE = s.SW_CODE
+        INNER JOIN TC_USER ru ON w.REQ_USER_ID = ru.USER_ID
+        LEFT JOIN TS_WORK_SURVEY sv ON sv.SERVICE_NO = w.SERVICE_NO
+        LEFT JOIN V_ORGANIZATION_STRUCTURE cd ON w.REQ_COMP_CD = cd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE rd ON ru.DEPT_CD = rd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE pd ON w.PROC_DEPT_CD = pd.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE ptd ON p.COMP_CODE = ptd.ORIGIN_CD
+        <include refid="workRegistrationSearch"/>
+    </select>
+
+    <select id="findAllUserGrid" resultType="com.hnix.sd.work.registration.record.dto.WorkRegisterGridDto">
+        <include refid="workRegistrationBase"/>
+        <include refid="workRegistrationSearch"/>
+        GROUP BY w.SERVICE_NO
+        ORDER BY w.REG_DT DESC
+    </select>
+
+    <select id="findById" resultType="com.hnix.sd.work.registration.record.dto.FindWorkRegistrationDto">
+        SELECT * FROM TS_WORK_HISTORY WHERE SERVICE_NO = #{serviceNo}
+    </select>
+
+    <select id="findByServiceNoStartingWith" resultType="string">
+        SELECT SERVICE_NO FROM TS_WORK_HISTORY WHERE SERVICE_NO LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <select id="findWorkRegistrationByServiceNo" resultType="com.hnix.sd.work.registration.record.dto.FindWorkRegistrationDto">
+        SELECT 
+            h.SERVICE_NO as serviceNo,
+            h.CONTRACT_NO as contractNo,
+            h.SUB_CD as subCd,
+            s.SW_CODE as swCode,
+            s.SW_NAME as swName,
+            h.SERVICE_CD as serviceCd,
+            h.REQ_DT as reqDt,
+            h.REQ_USER_ID as reqUserId,
+            u.USER_NM as reqUserNm,
+            h.REQ_COMP_CD as reqDeptCd,
+            h.REQ_USER_CONTRACT_TYPE as reqUserContractType,
+            h.STATUS_CD as statusCd,
+            req.COMPANY_NM as requestCompanyNm,
+            req.DEPARTMENT_NM as requestDepartmentNm,
+            req.MANAGE_NM as requestManageNm,
+            h.REQ_SUPPORT_CD as reqSupportCd,
+            con.COMPANY_NM as contractCompanyNm,
+            con.DEPARTMENT_NM as contractDepartmentNm,
+            con.MANAGE_NM as contractManageNm,
+            h.REQ_CONTENTS as reqContents,
+            h.PROC_DT as procDt,
+            h.PROC_SUPPORT_CD as procSupportCd,
+            h.PROC_USER_NM as procUserNm,
+            proc.COMPANY_NM as procCompanyNm,
+            h.PROC_CONTENTS as procContents,
+            h.PROC_RESULT_CD as procResultCd,
+            h.REMARK as remark,
+            h.REG_ID as regId
+        FROM TS_WORK_HISTORY h
+        INNER JOIN TS_WORK_CONTRACT c ON h.CONTRACT_NO = c.CONTRACT_NO
+        INNER JOIN TS_WORK_SW_PARTNER p ON h.SUB_CD = p.SUB_CODE
+        INNER JOIN TS_WORK_SW s ON p.SW_CODE = s.SW_CODE
+        INNER JOIN TC_USER u ON h.REQ_USER_ID = u.USER_ID
+        LEFT JOIN V_ORGANIZATION_STRUCTURE req ON u.DEPT_CD = req.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE con ON c.DEPT_CD = con.ORIGIN_CD
+        LEFT JOIN V_ORGANIZATION_STRUCTURE proc ON p.COMP_CODE = proc.ORIGIN_CD
+        WHERE h.SERVICE_NO = #{serviceNo}
+    </select>
+
+    <insert id="insertHistory">
+        INSERT INTO TS_WORK_HISTORY (
+            SERVICE_NO, CONTRACT_NO, SUB_CD, SERVICE_CD, REQ_DT, STATUS_CD,
+            REQ_COMP_CD, REQ_USER_ID, REQ_SUPPORT_CD, REQ_CONTENTS, REQ_USER_CONTRACT_TYPE,
+            PROC_DT, PROC_USER_NM, PROC_DEPT_CD, PROC_SUPPORT_CD, PROC_CONTENTS,
+            PROC_RESULT_CD, REMARK, MOD_ID, MOD_DT, REG_ID, REG_DT
+        ) VALUES (
+            #{serviceNo}, #{contractNo}, #{subCd}, #{serviceCd}, #{reqDt}, #{statusCd},
+            #{reqCompCd}, #{reqUserId}, #{reqSupportCd}, #{reqContents}, #{reqUserContractType},
+            #{procDt}, #{procUserNm}, #{procDeptCd}, #{procSupportCd}, #{procContents},
+            #{procResultCd}, #{remark}, #{modId}, #{modDt}, #{regId}, #{regDt}
+        )
+    </insert>
+
+    <update id="updateHistory">
+        UPDATE TS_WORK_HISTORY SET
+            SERVICE_CD = #{serviceCd},
+            REQ_DT = #{reqDt},
+            REQ_SUPPORT_CD = #{reqSupportCd},
+            REQ_CONTENTS = #{reqContents},
+            PROC_DT = #{procDt},
+            PROC_SUPPORT_CD = #{procSupportCd},
+            STATUS_CD = #{statusCd},
+            PROC_CONTENTS = #{procContents},
+            REMARK = #{remark},
+            MOD_DT = #{modDt},
+            MOD_ID = #{modId}
+        WHERE SERVICE_NO = #{serviceNo}
+    </update>
+
+</mapper>
