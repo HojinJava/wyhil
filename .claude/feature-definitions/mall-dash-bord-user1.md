@@ -1,12 +1,12 @@
-# {TITLE}
+# mall/dash-bord-user1 [L1]
 
-작업 지시 파일: `task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md` (본인 모델 브랜치에서 확인)
+작업 지시 파일: `task/mall/issue-31.md` (본인 모델 브랜치에서 확인)
 
 ---
 
 ## 작업 내용
 
-{COMMON_PROMPT}
+특정 상품을 구매한 사용자를 검색할 수 있는 API를 만들어줘
 
 ---
 
