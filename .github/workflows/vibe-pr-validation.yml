@@ -117,10 +117,13 @@ jobs:
             console.log(`[검사 3/4] 통과 → 작성자 확인 완료`);
 
             // 검사 4: head 브랜치가 base 브랜치를 ancestor로 갖는지 확인 (올바른 브랜치 파생 여부)
-            // compareCommits(base, head) 결과:
-            //   "ahead"    → head가 base의 descendant (정상)
-            //   "diverged" → head가 base와 무관한 history를 가짐 (main 등에서 파생된 경우)
-            //   "behind"   → head가 base보다 뒤처짐 (비정상)
+            // merge_base_commit 존재 여부로 판단:
+            //   존재함 → 공통 ancestor 있음 → 정상 (base 브랜치에서 파생된 것)
+            //   없음   → 공통 ancestor 없음 → 거부 (main 등 무관한 브랜치에서 파생)
+            // status 값 참고:
+            //   "ahead"    → head만 앞서 있음 (base에 추가 커밋 없음)
+            //   "diverged" → 양쪽 모두 branch point 이후 커밋이 쌓임 (정상 — base에 관리자 push가 있을 수 있음)
+            //   "behind"   → head가 base보다 뒤처짐
             console.log(`[검사 4/4] 브랜치 파생 관계 확인 중... (${baseBranch} → ${headBranch})`);
             try {
               const compareResult = await github.rest.repos.compareCommits({
@@ -132,15 +135,15 @@ jobs:
               const status = compareResult.data.status;
               const aheadBy = compareResult.data.ahead_by;
               const behindBy = compareResult.data.behind_by;
-              console.log(`  비교 결과: ${status} (ahead_by: ${aheadBy}, behind_by: ${behindBy})`);
-              if (status === 'diverged') {
-                console.log(`[실패] head 브랜치가 base 브랜치를 ancestor로 갖지 않음: ${status}`);
+              const mergeBase = compareResult.data.merge_base_commit?.sha;
+              console.log(`  비교 결과: ${status} (ahead_by: ${aheadBy}, behind_by: ${behindBy}, merge_base: ${mergeBase ?? '없음'})`);
+              if (!mergeBase) {
+                console.log(`[실패] 공통 ancestor 없음 — base 브랜치와 무관한 히스토리`);
                 await rejectPR(
                   `작업 브랜치가 모델 브랜치(\`${baseBranch}\`)에서 파생되지 않았습니다.\n\n` +
                   `| 항목 | 값 |\n|------|----|\n` +
                   `| 작업 브랜치 | \`${headBranch}\` |\n` +
-                  `| PR 대상 브랜치 | \`${baseBranch}\` |\n` +
-                  `| 비교 결과 | \`${status}\` — 두 브랜치가 공통 ancestor를 공유하지 않음 |\n\n` +
+                  `| PR 대상 브랜치 | \`${baseBranch}\` |\n\n` +
                   `작업 브랜치는 반드시 \`${baseBranch}\`를 upstream으로 생성해야 합니다:\n` +
                   "```\n" +
                   `git fetch origin\n` +
