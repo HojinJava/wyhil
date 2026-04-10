@@ -139,7 +139,13 @@ gh issue create \
   --label "project:{PROJECT}"
 ```
 
-생성된 ISSUE_NUMBER 저장 후 feature.md의 `{ISSUE_NUMBER}` 플레이스홀더를 실제 번호로 치환하고 파일 업데이트.
+생성된 ISSUE_NUMBER 저장 후 아래 두 작업을 순서대로 실행한다:
+
+1. feature.md의 `{ISSUE_NUMBER}` 플레이스홀더를 실제 번호로 치환하고 파일 저장.
+2. GitHub 이슈 바디를 업데이트된 파일로 교체:
+   ```bash
+   gh issue edit {ISSUE_NUMBER} --body-file "{FEATURE_DEF_PATH}"
+   ```
 
 ### 5단계: 모델 브랜치에 issue-{N}.md 배포
 
