@@ -33,10 +33,23 @@ PR 올리기 전 Commits 탭에서 본인 커밋이 1개인지 확인한다.
 
 ## 작업 완료 후 파일 정리
 
-PR 생성이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.
+PR 생성이 완료되면 이 파일을 `task_done/` 폴더로 이동한다.  
+**작업 브랜치와 모델 베이스 브랜치 모두** 정리해야 한다.
+
+**1. 현재 작업 브랜치에서 이동**
 
 ```
 git mv task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md task_done/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md
 git commit -m "chore: move issue-{ISSUE_NUMBER} task to task_done"
 git push origin vibe/{MODEL}/{SLUG}-{ISSUE_NUMBER}
+```
+
+**2. 모델 베이스 브랜치에서도 이동**
+
+```
+git checkout {MODEL}
+git pull origin {MODEL}
+git mv task/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md task_done/{TARGET_DIR}/issue-{ISSUE_NUMBER}.md
+git commit -m "chore: move issue-{ISSUE_NUMBER} task to task_done"
+git push origin {MODEL}
 ```
