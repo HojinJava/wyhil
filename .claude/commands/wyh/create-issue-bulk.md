@@ -44,11 +44,13 @@ JSON 파일에 정의된 이슈 목록을 순차적으로 처리하여 Vibe Eval
 
 | 필드 | 타입 | 설명 | 허용값 |
 |------|------|------|--------|
-| `project` | string | 프로젝트 alias | `"all"` 또는 `["mall", "socket", "card", "hax-web"]` |
+| `project` | string | 프로젝트 alias | `"all"` (문자열) 또는 `"mall"` \| `"socket"` \| `"card"` \| `"hax-web"` |
 | `title` | string | 기능 제목 (영어, kebab-case 권장) | 예: `login-feature`, `product-review` |
-| `level` | string | 난이도 레벨 | `["L1", "L2", "L3"]` |
+| `level` | string | 난이도 레벨 | `"L1"` \| `"L2"` \| `"L3"` |
 | `prompt` | string | AI에게 전달할 공통 프롬프트 | 자유 텍스트 (여러 줄 가능) |
-| `models` | string\|array | 참여 모델 | `"all"` 또는 `["claude", "wyhill", "wyhill-guide", "antigravity", "codex"]` |
+| `models` | string\|array | 참여 모델 | `"all"` (문자열) 또는 `["claude", "wyhill", "wyhill-guide", "antigravity", "codex"]` 중 선택 배열 |
+
+> `"all"`은 반드시 **문자열**로 작성한다. `["all"]` 처럼 배열로 쓰면 유효성 오류가 난다.
 
 ---
 
@@ -68,14 +70,26 @@ models  : "all" 또는 ["claude", "wyhill", "wyhill-guide", "antigravity", "code
 
 ### 1단계: JSON 파일 읽기 및 유효성 검사
 
+**먼저** `.github/vibe-projects.json`과 `.github/vibe-models.json`을 읽어 허용값 집합을 준비한다:
+
+```
+VALID_PROJECTS = vibe-projects.json의 모든 alias 키   (예: ["mall", "socket", "card", "hax-web"])
+VALID_MODELS   = vibe-models.json의 모든 모델 키       (예: ["claude", "wyhill", "wyhill-guide", "antigravity", "codex"])
+VALID_LEVELS   = ["L1", "L2", "L3"]
+```
+
 JSON 파일을 읽어 파싱한다.
 
-각 항목에 대해 아래를 검증한다:
-- `project`: `"all"` 이거나 `.github/vibe-projects.json`에 존재하는 alias인지
-- `title`: 비어있지 않은지
-- `level`: `L1`, `L2`, `L3` 중 하나인지
-- `prompt`: 비어있지 않은지
-- `models`: `"all"` 또는 유효한 모델 키 배열인지
+각 항목에 대해 아래를 순서대로 검증한다:
+
+1. **project**: 값이 문자열 `"all"` 이거나 VALID_PROJECTS에 포함되는지
+   - 오류 예시: `project "xyz" is not a valid alias. Valid: ["mall", "socket", "card", "hax-web"]`
+2. **title**: 비어있지 않은지
+3. **level**: VALID_LEVELS에 포함되는지
+   - 오류 예시: `level "L4" is invalid. Valid: ["L1", "L2", "L3"]`
+4. **prompt**: 비어있지 않은지
+5. **models**: 문자열 `"all"` 이거나, 배열이며 모든 원소가 VALID_MODELS에 포함되는지
+   - 오류 예시: `models contains unknown key "gpt4". Valid: ["claude", "wyhill", "wyhill-guide", "antigravity", "codex"]`
 
 유효성 오류가 있으면 항목 번호와 오류 내용을 출력하고 해당 항목은 건너뛴다.
 
@@ -101,8 +115,7 @@ JSON 파일을 읽어 파싱한다.
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 ```
 
-`.github/vibe-models.json`을 읽어 전체 모델 목록 준비.
-`.github/vibe-projects.json`을 읽어 프로젝트별 folder 정보 준비.
+1단계에서 읽은 vibe-models.json, vibe-projects.json을 그대로 사용한다 (재로드 불필요).
 
 ### 3단계: 이슈 순차 생성
 
