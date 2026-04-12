@@ -1,22 +1,22 @@
 ---
-name: wyh:bulk-create-issue
+name: wyh:create-issue-bulk
 description: Use when batch-creating multiple vibe-eval GitHub issues from a JSON file. Reads a list of issue definitions and creates them sequentially.
 ---
 
-# w-bulk-create-issue
+# wyh:create-issue-bulk
 
 JSON 파일에 정의된 이슈 목록을 순차적으로 처리하여 Vibe Eval 이슈를 일괄 생성한다.
 
 ## 사용법
 
 ```
-/w-bulk-create-issue <JSON_FILE_PATH>
+/wyh:create-issue-bulk <JSON_FILE_PATH>
 ```
 
 예시:
 ```
-/w-bulk-create-issue issues.json
-/w-bulk-create-issue .claude/bulk/sprint-1.json
+/wyh:create-issue-bulk issues.json
+/wyh:create-issue-bulk .claude/bulk/sprint-1.json
 ```
 
 ---
@@ -44,15 +44,11 @@ JSON 파일에 정의된 이슈 목록을 순차적으로 처리하여 Vibe Eval
 
 | 필드 | 타입 | 설명 | 허용값 |
 |------|------|------|--------|
-| `project` | string | 프로젝트 alias | vibe-projects.json에 등록된 alias |
+| `project` | string | 프로젝트 alias | `"all"` 또는 `["mall", "socket", "card", "hax-web"]` |
 | `title` | string | 기능 제목 (영어, kebab-case 권장) | 예: `login-feature`, `product-review` |
-| `level` | string | 난이도 레벨 | `L1`, `L2`, `L3` |
+| `level` | string | 난이도 레벨 | `["L1", "L2", "L3"]` |
 | `prompt` | string | AI에게 전달할 공통 프롬프트 | 자유 텍스트 (여러 줄 가능) |
-| `models` | string\|array | 참여 모델 | 모델 키 배열 또는 `"all"` |
-
-**models 허용값:**
-- `"all"` — `.github/vibe-models.json`에 등록된 전체 모델
-- 배열 — `["claude", "wyhill", "wyhill-guide", "antigravity", "codex"]` 중 선택
+| `models` | string\|array | 참여 모델 | `"all"` 또는 `["claude", "wyhill", "wyhill-guide", "antigravity", "codex"]` |
 
 ---
 
@@ -62,8 +58,12 @@ JSON 파일에 정의된 이슈 목록을 순차적으로 처리하여 Vibe Eval
 
 인수가 없으면 사용법을 출력하고 종료:
 ```
-사용법: /w-bulk-create-issue <JSON_FILE_PATH>
-예시:   /w-bulk-create-issue issues.json
+사용법: /wyh:create-issue-bulk <JSON_FILE_PATH>
+예시:   /wyh:create-issue-bulk issues.json
+
+project : "all" 또는 ["mall", "socket", "card", "hax-web"]
+level   : ["L1", "L2", "L3"]
+models  : "all" 또는 ["claude", "wyhill", "wyhill-guide", "antigravity", "codex"]
 ```
 
 ### 1단계: JSON 파일 읽기 및 유효성 검사
@@ -71,7 +71,7 @@ JSON 파일에 정의된 이슈 목록을 순차적으로 처리하여 Vibe Eval
 JSON 파일을 읽어 파싱한다.
 
 각 항목에 대해 아래를 검증한다:
-- `project`: `.github/vibe-projects.json`에 존재하는 alias인지
+- `project`: `"all"` 이거나 `.github/vibe-projects.json`에 존재하는 alias인지
 - `title`: 비어있지 않은지
 - `level`: `L1`, `L2`, `L3` 중 하나인지
 - `prompt`: 비어있지 않은지
@@ -118,7 +118,7 @@ REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 #### 변수 계산
 
 ```
-PROJECT_ALIAS = project 값
+PROJECT_ALIAS = project 값 ("all"이면 vibe-projects.json 전체 alias 목록으로 확장하여 각 프로젝트마다 이슈를 별도 생성)
 TARGET_DIR    = vibe-projects.json에서 PROJECT_ALIAS의 folder 값
 TITLE_RAW     = title 값
 LEVEL         = level 값

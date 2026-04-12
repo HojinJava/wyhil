@@ -1,0 +1,9 @@
+[
+  {
+    "project": "mall",
+    "title": "login-feature",
+    "level": "L1",
+    "prompt": "로그인 기능을 구현하세요. 이메일과 비밀번호로 로그인할 수 있어야 하며, JWT 토큰 기반 인증을 사용합니다.",
+    "models": ["claude", "wyhill"]
+  }
+]

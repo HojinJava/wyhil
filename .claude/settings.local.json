@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(git show:*)",
+      "Bash(cp \".claude/commands/w-bulk-create-issue.md\" \".claude/commands/wyh/bulk-create-issue.md\")",
+      "Bash(sed -i 's/name: w-bulk-create-issue/name: wyh:bulk-create-issue/' \".claude/commands/wyh/bulk-create-issue.md\")"
+    ]
+  }
+}
