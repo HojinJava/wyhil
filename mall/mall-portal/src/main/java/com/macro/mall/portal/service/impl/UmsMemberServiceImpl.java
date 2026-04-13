@@ -76,6 +76,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     @Override
     public void register(String username, String password, String telephone, String authCode) {
+        LOGGER.info("회원가입 요청 body - username: {}, telephone: {}, authCode: {}", username, telephone, authCode);
         //验证验证码
         if(!verifyAuthCode(authCode,telephone)){
             Asserts.fail("验证码错误");
