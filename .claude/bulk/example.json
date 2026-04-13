@@ -1,9 +1,9 @@
 [
   {
-    "project": "mall",
+    "project": "all",
     "title": "login-feature",
     "level": "L1",
-    "prompt": "로그인 기능을 구현하세요. 이메일과 비밀번호로 로그인할 수 있어야 하며, JWT 토큰 기반 인증을 사용합니다.",
-    "models": ["claude", "wyhill"]
+    "prompt": "프로젝를 분석해서 꼭 필요해 보이는 기능, 있으면 좋을거같은 기능, 없어도 되지만 좋은 인싸이트가 있는 기능 이렇게 리스트업 해줘 각 종목마다 최대5개로 해",
+    "models": "all"
   }
 ]
