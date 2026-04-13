@@ -14,6 +14,7 @@ namespace BinaryPacketClient
         [STAThread]
         static void Main()
         {
+            // WinForms 클라이언트 UI를 초기화하고 메인 폼을 실행한다.
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

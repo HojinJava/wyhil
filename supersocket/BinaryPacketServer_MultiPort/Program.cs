@@ -14,6 +14,7 @@ namespace BinaryPacketServer_MultiPort
         [STAThread]
         static void Main()
         {
+            // 멀티포트 서버 UI를 초기화하고 메인 폼을 실행한다.
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
