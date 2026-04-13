@@ -9,7 +9,7 @@ git checkout -b vibe/codex/card-login-feature-l1-55 origin/codex
 
 ## 해야 할 작업
 
-공통 프롬프트는 .claude/feature-definitions/card-login-feature-l1.md 참고
+각 프로젝트에서 main()함수를 찾아서 주석 달아줘
 
 ## 반드시 지켜야 할 규칙
 
@@ -19,7 +19,7 @@ PR 본문에 `References #55` 를 반드시 포함한다.
 PR에 본인 모델 라벨을 추가한다.
 
 PR 올리기 전 Commits 탭에서 본인 커밋이 1개인지 확인한다.
-여러 개라면 main에서 브랜치를 딜 것이메 PR을 닫고 처음부터 다시 시작한다.
+여러 개라면 main에서 브랜치를 딜 것이므로 PR을 닫고 처음부터 다시 시작한다.
 
 ## PR 본문 필수 항목
 
