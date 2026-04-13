@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MallAdminApplication {
     public static void main(String[] args) {
+        // 관리자 백엔드 애플리케이션을 시작한다.
         SpringApplication.run(MallAdminApplication.class, args);
     }
 }

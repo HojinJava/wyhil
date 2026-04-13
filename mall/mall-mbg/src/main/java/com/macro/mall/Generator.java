@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class Generator {
     public static void main(String[] args) throws Exception {
+        // MyBatis Generator 설정을 읽어 매퍼와 모델 코드를 생성한다.
         //MBG 执行过程中的警告信息
         List<String> warnings = new ArrayList<String>();
         //当生成的代码重复时，覆盖原代码
