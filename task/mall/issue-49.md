@@ -9,7 +9,7 @@ git checkout -b vibe/wyhill-guide/mall-login-feature-l3-49 origin/wyhill-guide
 
 ## 해야 할 작업
 
-공통 프롬프트는 .claude/feature-definitions/mall-login-feature-l3.md 참고
+프로젝를 분석해서 꼭 필요해 보이는 기능, 있으면 좋을거같은 기능, 없어도 되지만 좋은 인싸이트가 있는 기능 이렇게 리스트업 해줘 각 종목마다 최대5개로 해
 
 ## 반드시 지켜야 할 규칙
 
@@ -19,7 +19,7 @@ PR 본문에 `References #49` 를 반드시 포함한다.
 PR에 본인 모델 라벨을 추가한다.
 
 PR 올리기 전 Commits 탭에서 본인 커밋이 1개인지 확인한다.
-여러 개라면 main에서 브랜치를 딜 것이메 PR을 닫고 처음부터 다시 시작한다.
+여러 개라면 main에서 브랜치를 딜 것이므로 PR을 닫고 처음부터 다시 시작한다.
 
 ## PR 본문 필수 항목
 
