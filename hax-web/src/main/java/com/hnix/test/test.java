@@ -15,6 +15,7 @@ import java.io.*;
 
 public class test {
   public static void main(String[] args) {
+    // 엑셀 템플릿을 읽어 테스트용 결과 파일을 생성한다.
     System.out.println("✅ 프로그램이 정상 실행되었습니다.");
     String templatePath = "서비스활동보고서 양식.xlsx";
     String outputPath = "서비스활동 보고서 양식-테스트.xlsx";
